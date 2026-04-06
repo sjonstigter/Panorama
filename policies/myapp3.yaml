@@ -1,0 +1,76 @@
+group_tag: myapp3
+position_keyword: bottom
+
+rules:
+  - name: myapp3 - wftest 98 to 99
+    device_group: ss-external
+    source_zones:
+      - any
+    source_addresses:
+      - bd_myapp3_wftest_98_tst - 10.221.17.32_28
+    source_users:
+      - any
+    destination_zones:
+      - any
+    destination_addresses:
+      - bd_myapp3_wftest_99_tst - 10.221.17.48_28
+    applications:
+      - ssl
+    services:
+      - any
+    categories:
+      - any
+    tags:
+      - myapp3
+      - sddc - automated
+      - tst
+    action: allow
+
+  - name: myapp3 - wftest 70 to 80
+    device_group: ss-external
+    source_zones:
+      - any
+    source_addresses:
+      - bd_myapp3_wftest_70_tst - 10.221.17.96_28
+    source_users:
+      - any
+    destination_zones:
+      - any
+    destination_addresses:
+      - bd_myapp3_wftest_80_tst - 10.221.17.80_28
+    applications:
+      - ssl
+    services:
+      - any
+    categories:
+      - any
+    tags:
+      - myapp3
+      - sddc - automated
+      - tst
+    action: allow
+
+  - name: myapp3 - wftest 80 to 90 and 98
+    device_group: ss-external
+    source_zones:
+      - any
+    source_addresses:
+      - bd_myapp3_wftest_80_tst - 10.221.17.80_28
+    source_users:
+      - any
+    destination_zones:
+      - any
+    destination_addresses:
+      - bd_myapp3_wftest_90_tst - 10.221.17.64_28
+      - bd_myapp3_wftest_98_tst - 10.221.17.32_28
+    applications:
+      - ssl
+    services:
+      - any
+    categories:
+      - any
+    tags:
+      - myapp3
+      - sddc - automated
+      - tst
+    action: allow

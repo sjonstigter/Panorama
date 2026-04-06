@@ -1,0 +1,63 @@
+group_tag: myapp1
+position_keyword: bottom
+
+rules:
+  - name: myapp1 - appserver to db1 server
+    device_group: ss-external
+    source_zones:
+      - any
+    source_addresses:
+      - bd_myapp1_apserver_prd - 10.221.10.0_28
+    source_users:
+      - any
+    destination_zones:
+      - any
+    destination_addresses:
+      - bd_myapp1_dbserver01_prd - 10.221.9.192_28
+    applications:
+      - any
+    services:
+      - 1433-tcp
+    categories:
+      - any
+    action: allow
+
+  - name: myapp1 - appserver to db2 server
+    device_group: ss-external
+    source_zones:
+      - any
+    source_addresses:
+      - bd_myapp1_apserver_prd - 10.221.10.0_28
+    source_users:
+      - any
+    destination_zones:
+      - any
+    destination_addresses:
+      - bd_myapp1_dbserver02_prd - 10.221.9.208_28
+    applications:
+      - any
+    services:
+      - 1433-tcp
+    categories:
+      - any
+    action: allow
+
+  - name: myapp1 - loadbalancer 1 to api server
+    device_group: ss-external
+    source_zones:
+      - any
+    source_addresses:
+      - bd_myapp1_lb01_prd - 10.221.9.224_28
+    source_users:
+      - any
+    destination_zones:
+      - any
+    destination_addresses:
+      - bd_myapp1_apserver_prd - 10.221.10.0_28
+    applications:
+      - ssl
+    services:
+      - any
+    categories:
+      - any
+    action: allow

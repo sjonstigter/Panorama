@@ -1,0 +1,21 @@
+services:
+- name: 12345-tcp
+  protocol: tcp
+  destination_port: '12345'
+  description: Service object 1 from Terraform
+- name: 1433-tcp
+  protocol: tcp
+  destination_port: '1433'
+  description: Managed by AWX
+- name: 1434-tcp
+  protocol: tcp
+  destination_port: '1434'
+  description: Managed by AWX
+- name: 9876-tcp
+  protocol: tcp
+  destination_port: '9876'
+  description: Service object 2 from Terraform
+- name: tcp-8080
+  protocol: tcp
+  destination_port: '8080'
+  description: Managed by AWX

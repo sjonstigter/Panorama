@@ -1,0 +1,219 @@
+group_tag: myapp2
+position_keyword: bottom
+rules:
+
+- name: myapp2 - api to db acc
+  device_group: ss-external
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_api_acc - 192.168.0.16_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_db_acc - 192.168.0.32_28
+  applications:
+  - any
+  services:
+  - 1433-tcp
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - acc
+  action: allow
+
+- name: myapp2 - api to db dev
+  device_group: ss-external
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_api_dev - 192.168.3.16_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_db_dev - 192.168.3.32_28
+  applications:
+  - any
+  services:
+  - 1433-tcp
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - dev
+  action: allow
+
+- name: myapp2 - api to db prd
+  device_group: ss-external
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_api_prd - 192.168.1.16_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_db_prd - 192.168.1.32_28
+  applications:
+  - any
+  services:
+  - 1433-tcp
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - prd
+  action: allow
+
+- name: myapp2 - api to db tst
+  device_group: ss-external
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_api_tst - 192.168.2.16_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_db_tst - 192.168.2.32_28
+  applications:
+  - any
+  services:
+  - 1433-tcp
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - tst
+  action: allow
+
+- name: myapp2 - web to api acc
+  device_group: ss-external
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_web_acc - 192.168.0.0_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_api_acc - 192.168.0.16_28
+  applications:
+  - ssl
+  services:
+  - any
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - acc
+  action: allow
+
+- name: myapp2 - web to api dev
+  device_group: ss-external
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_web_dev - 192.168.3.0_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_api_dev - 192.168.3.16_28
+  applications:
+  - any
+  services:
+  - tcp-8080
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - dev
+  action: allow
+
+- name: myapp2 - web to api dev internal
+  device_group: ss-internal
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_web_dev - 192.168.3.0_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_api_dev - 192.168.3.16_28
+  applications:
+  - any
+  services:
+  - tcp-8080
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - dev
+  action: allow
+
+- name: myapp2 - web to api prd
+  device_group: ss-external
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_web_prd - 192.168.1.0_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_api_prd - 192.168.1.16_28
+  applications:
+  - ssl
+  services:
+  - any
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - prd
+  action: allow
+
+- name: myapp2 - web to api tst
+  device_group: ss-external
+  source_zones:
+  - any
+  source_addresses:
+  - bd_myapp2_web_tst - 192.168.2.0_28
+  source_users:
+  - any
+  destination_zones:
+  - any
+  destination_addresses:
+  - bd_myapp2_api_tst - 192.168.2.16_28
+  applications:
+  - ssl
+  services:
+  - any
+  categories:
+  - any
+  tags:
+  - myapp2
+  - sddc - automated
+  - tst
+  action: allow
