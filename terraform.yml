@@ -28,6 +28,8 @@
           - destination_zones is defined
           - applications is defined
           - tags is defined
+          - group is defined
+          - log_setting is defined
           - action is defined
         fail_msg: "One or more required extra_vars are missing."
 
@@ -136,6 +138,8 @@
             - "{{ service_name }}"
           categories: "{{ categories | default(['any']) }}"
           tags: "{{ tags }}"
+          group: "{{ group }}"
+          log_setting: "{{ log_setting }}"
           action: "{{ action }}"
 
     - name: Merge service object into services list
