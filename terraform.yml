@@ -125,6 +125,8 @@
       ansible.builtin.set_fact:
         new_rule:
           name: "{{ rule_name }}"
+          description: "{{ description }}"
+          audit_comment: "{{ audit_comment }}"
           device_group: "{{ device_group }}"
           source_zones: "{{ source_zones }}"
           source_addresses:
