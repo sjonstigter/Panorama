@@ -1,0 +1,255 @@
+---
+- name: Update Terraform YAML inputs for Panorama policy
+  hosts: terraform.zero-days.nl
+  gather_facts: false
+
+  vars:
+    terraform_root: "/home/sstigter/panorama"
+    policies_dir: "{{ terraform_root }}/policies"
+    services_file: "{{ terraform_root }}/services.yaml"
+    address_objects_file: "{{ terraform_root }}/address_objects.yaml"
+    policy_file: "{{ policies_dir }}/{{ group_tag }}.yaml"
+
+  tasks:
+    - name: Validate mandatory variables
+      ansible.builtin.assert:
+        that:
+          - group_tag is defined
+          - rule_name is defined
+          - device_group is defined
+          - source_address_name is defined
+          - source_address_value is defined
+          - destination_address_name is defined
+          - destination_address_value is defined
+          - service_name is defined
+          - service_protocol is defined
+          - service_destination_port is defined
+          - source_zones is defined
+          - destination_zones is defined
+          - applications is defined
+          - tags is defined
+          - action is defined
+        fail_msg: "One or more required extra_vars are missing."
+
+    - name: Ensure policies directory exists
+      ansible.builtin.file:
+        path: "{{ policies_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Check whether services.yaml exists
+      ansible.builtin.stat:
+        path: "{{ services_file }}"
+      register: services_file_stat
+
+    - name: Check whether address_objects.yaml exists
+      ansible.builtin.stat:
+        path: "{{ address_objects_file }}"
+      register: address_objects_file_stat
+
+    - name: Check whether policy file exists
+      ansible.builtin.stat:
+        path: "{{ policy_file }}"
+      register: policy_file_stat
+
+    - name: Read services.yaml if present
+      ansible.builtin.slurp:
+        src: "{{ services_file }}"
+      register: services_file_raw
+      when: services_file_stat.stat.exists
+
+    - name: Read address_objects.yaml if present
+      ansible.builtin.slurp:
+        src: "{{ address_objects_file }}"
+      register: address_objects_file_raw
+      when: address_objects_file_stat.stat.exists
+
+    - name: Read policy file if present
+      ansible.builtin.slurp:
+        src: "{{ policy_file }}"
+      register: policy_file_raw
+      when: policy_file_stat.stat.exists
+
+    - name: Parse existing YAML content
+      ansible.builtin.set_fact:
+        services_data: >-
+          {{
+            (services_file_raw.content | b64decode | from_yaml)
+            if services_file_stat.stat.exists
+            else {'services': []}
+          }}
+        address_objects_data: >-
+          {{
+            (address_objects_file_raw.content | b64decode | from_yaml)
+            if address_objects_file_stat.stat.exists
+            else {'address_objects': []}
+          }}
+        policy_data: >-
+          {{
+            (policy_file_raw.content | b64decode | from_yaml)
+            if policy_file_stat.stat.exists
+            else {
+              'group_tag': group_tag,
+              'position_keyword': (rulebase_position_keyword | default('bottom')),
+              'rules': []
+            }
+          }}
+
+    - name: Define desired service object
+      ansible.builtin.set_fact:
+        new_service:
+          name: "{{ service_name }}"
+          protocol: "{{ service_protocol }}"
+          destination_port: "{{ service_destination_port }}"
+          description: "{{ service_description | default('Managed by AWX') }}"
+
+    - name: Define desired source address object
+      ansible.builtin.set_fact:
+        new_source_address_object:
+          name: "{{ source_address_name }}"
+          value: "{{ source_address_value }}"
+          type: "{{ source_address_type | default('ip-netmask') }}"
+          description: "{{ source_address_description | default('Managed by AWX') }}"
+
+    - name: Define desired destination address object
+      ansible.builtin.set_fact:
+        new_destination_address_object:
+          name: "{{ destination_address_name }}"
+          value: "{{ destination_address_value }}"
+          type: "{{ destination_address_type | default('ip-netmask') }}"
+          description: "{{ destination_address_description | default('Managed by AWX') }}"
+
+    - name: Define desired firewall rule
+      ansible.builtin.set_fact:
+        new_rule:
+          name: "{{ rule_name }}"
+          device_group: "{{ device_group }}"
+          source_zones: "{{ source_zones }}"
+          source_addresses:
+            - "{{ source_address_name }}"
+          source_users: "{{ source_users | default(['any']) }}"
+          destination_zones: "{{ destination_zones }}"
+          destination_addresses:
+            - "{{ destination_address_name }}"
+          applications: "{{ applications }}"
+          services:
+            - "{{ service_name }}"
+          categories: "{{ categories | default(['any']) }}"
+          tags: "{{ tags }}"
+          action: "{{ action }}"
+
+    - name: Merge service object into services list
+      ansible.builtin.set_fact:
+        merged_services: >-
+          {{
+            (
+              services_data.services
+              | rejectattr('name', 'equalto', new_service.name)
+              | list
+            )
+            + [new_service]
+          }}
+
+    - name: Merge source address object into address object list
+      ansible.builtin.set_fact:
+        merged_address_objects_step1: >-
+          {{
+            (
+              address_objects_data.address_objects
+              | rejectattr('name', 'equalto', new_source_address_object.name)
+              | list
+            )
+            + [new_source_address_object]
+          }}
+
+    - name: Merge destination address object into address object list
+      ansible.builtin.set_fact:
+        merged_address_objects: >-
+          {{
+            (
+              merged_address_objects_step1
+              | rejectattr('name', 'equalto', new_destination_address_object.name)
+              | list
+            )
+            + [new_destination_address_object]
+          }}
+
+    - name: Merge rule into policy rules list
+      ansible.builtin.set_fact:
+        merged_rules: >-
+          {{
+            (
+              policy_data.rules
+              | rejectattr('name', 'equalto', new_rule.name)
+              | list
+            )
+            + [new_rule]
+          }}
+
+    - name: Build updated services data
+      ansible.builtin.set_fact:
+        updated_services_data:
+          services: "{{ merged_services }}"
+
+    - name: Build updated address objects data
+      ansible.builtin.set_fact:
+        updated_address_objects_data:
+          address_objects: "{{ merged_address_objects }}"
+
+    - name: Build updated policy data
+      ansible.builtin.set_fact:
+        updated_policy_data:
+          group_tag: "{{ group_tag }}"
+          # position_keyword: "{{ rulebase_position_keyword | default(policy_data.position_keyword | default('bottom')) }}"
+          rules: "{{ merged_rules }}"
+
+    - name: Write services.yaml
+      ansible.builtin.copy:
+        dest: "{{ services_file }}"
+        content: "{{ updated_services_data | to_nice_yaml(indent=2, sort_keys=False) }}"
+        mode: "0644"
+
+    - name: Write address_objects.yaml
+      ansible.builtin.copy:
+        dest: "{{ address_objects_file }}"
+        content: "{{ updated_address_objects_data | to_nice_yaml(indent=2, sort_keys=False) }}"
+        mode: "0644"
+
+#    - name: Write policy file
+#      ansible.builtin.copy:
+#        dest: "{{ policy_file }}"
+#        content: "{{ updated_policy_data | to_nice_yaml(indent=2, sort_keys=False) }}"
+#        mode: "0644"
+
+    - name: Write policy file
+      ansible.builtin.copy:
+        dest: "{{ policy_file }}"
+        content: >-
+          {{
+            updated_policy_data
+            | to_nice_yaml(indent=2, sort_keys=False)
+            | regex_replace('\n- name:', '\n\n- name:')
+          }}
+        mode: "0644"
+
+    - name: Run terraform init
+      ansible.builtin.command: terraform init
+      args:
+        chdir: "{{ terraform_root }}"
+    
+    - name: Run terraform plan
+      ansible.builtin.command: terraform plan -out=tfplan
+      args:
+        chdir: "{{ terraform_root }}"
+    
+    - name: Run terraform apply
+      ansible.builtin.command: terraform apply -auto-approve tfplan
+      args:
+        chdir: "{{ terraform_root }}"
+
+    - name: Show updated files
+      ansible.builtin.debug:
+        msg:
+          - "Updated {{ services_file }}"
+          - "Updated {{ address_objects_file }}"
+          - "Updated {{ policy_file }}"
