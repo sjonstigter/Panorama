@@ -132,18 +132,15 @@
         gathered_filter: '*'
       register: gathered_service_objects
 
-    - name: Find first matching service object
+    - name: Find matching service object names
       ansible.builtin.set_fact:
         service_object: >-
           {{
-            (
-              gathered_service_objects.gathered
-              | selectattr('protocol', 'equalto', protocol)
-              | selectattr('destination_port', 'equalto', destination_port | string)
-              | map(attribute='name')
-              | list
-              | first
-            ) | default('')
+            gathered_service_objects.gathered
+            | selectattr('protocol', 'equalto', protocol)
+            | selectattr('destination_port', 'equalto', destination_port | string)
+            | map(attribute='name')
+            | list
           }}
 
     - name: Show service object
