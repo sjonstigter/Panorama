@@ -1,6 +1,6 @@
 ---
 - name: ansible-vault test playbook
-  hosts: "panorama"
+  hosts: "panorama.zero-days.nl"
   connection: local
   gather_facts: false
   vars_files:
