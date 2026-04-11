@@ -95,3 +95,17 @@
         msg: >-
           No Palo Alto address_object found matching '{{ source_address }}'
       when: source_address_object | length == 0
+
+    - name: Find firewall destination object based on input variable [1/2] - Search for address object
+      ansible.builtin.set_fact:
+        destination_address_object: >-
+          {{ gathered_address_objects.gathered
+            | selectattr('value', 'search', destination_address)
+            | map(attribute='name')
+            | list }}
+
+    - name: Find firewall destination object based on input variable [2/2] - Fail if no address object was found
+      ansible.builtin.fail:
+        msg: >-
+          No Palo Alto address_object found matching '{{ destination_address }}'
+      when: destination_address_object | length == 0
