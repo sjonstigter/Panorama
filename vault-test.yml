@@ -109,3 +109,11 @@
         msg: >-
           No Palo Alto address_object found matching '{{ destination_address }}'
       when: destination_address_object | length == 0
+
+    - name: Show source address object
+      ansible.builtin.debug:
+        var: source_address_object
+
+    - name: Show destination address object
+      ansible.builtin.debug:
+        var: destination_address_object
