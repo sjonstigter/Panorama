@@ -37,6 +37,21 @@
       register: ib_network_lookup_src
       when: source_is_host
 
+    - name: Show source value
+      ansible.builtin.debug:
+        var: ib_network_lookup_src.json[0].network
+
+    - name: Set source_address to Infoblox result if exists
+      ansible.builtin.set_fact:
+        source_address: >-
+          {{
+            (ib_network_lookup_src.json | default([])) | length > 0
+            | ternary(
+                ib_network_lookup_src.json[0].network,
+                source_address
+              )
+          }}
+
     - name: Find containing network for destination IP
       ansible.builtin.uri:
         url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_address }}&_return_fields=network"
@@ -49,22 +64,29 @@
       register: ib_network_lookup_dst
       when: destination_is_host
 
-    - name: Show source value
-      ansible.builtin.debug:
-        var: ib_network_lookup_src.json[0].network
-
     - name: Show destination value
       ansible.builtin.debug:
         var: ib_network_lookup_dst.json[0].network
 
-    - name: Find firewall source object based on input variable [1/3] - Get address objects from Panorama
+    - name: Set destination_address to Infoblox result if exists
+      ansible.builtin.set_fact:
+        destination_address: >-
+          {{
+            (ib_network_lookup_dst.json | default([])) | length > 0
+            | ternary(
+                ib_network_lookup_dst.json[0].network,
+                destination_address
+              )
+          }}
+
+    - name: Get address objects from Panorama
       paloaltonetworks.panos.panos_address_object:
         provider: "{{ provider }}"
         state: 'gathered'
         gathered_filter: '*'
       register: gathered_address_objects
 
-    - name: Find firewall source object based on input variable [2/3] - Search for address object
+    - name: Find firewall source object based on input variable [1/2] - Search for address object
       ansible.builtin.set_fact:
         source_address_object: >-
           {{ gathered_address_objects.gathered
@@ -72,7 +94,7 @@
             | map(attribute='name')
             | list }}
 
-    - name: Find firewall source object based on input variable [3/3] - Fail if no address object was found
+    - name: Find firewall source object based on input variable [2/2] - Fail if no address object was found
       ansible.builtin.fail:
         msg: >-
           No Palo Alto address_object found matching '{{ source_address }}'
