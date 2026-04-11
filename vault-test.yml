@@ -7,17 +7,21 @@
    - vault/vault-fwrules.yml
 
   tasks:
-    - name: Set lookup_ip
+    - name: Sample values
       ansible.builtin.set_fact:
-        lookup_ip: 10.221.7.1
+        source_ip: "10.229.57.0/28"
+        destination_ip: "10.221.7.1"
 
-    - name: show vault encrypted variables
-      ansible.builtin.debug: 
-        msg: "{{infoblox_username}}"
+    - name: Determine if source and destination IPs are host or network
+      ansible.builtin.set_fact:
+        source_is_host: "{{ '/' not in source_ip or source_ip.endswith('/32') }}"
+        source_is_network: "{{ '/' in source_ip and not source_ip.endswith('/32') }}"
+        destination_is_host: "{{ '/' not in destination_ip or destination_ip.endswith('/32') }}"
+        destination_is_network: "{{ '/' in destination_ip and not destination_ip.endswith('/32') }}" 
 
-    - name: Find containing network for IP
+    - name: Find containing network for destination IP
       ansible.builtin.uri:
-        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ lookup_ip }}&_return_fields=network,network_view"
+        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_ip }}&_return_fields=network,network_view"
         method: GET
         user: "{{ infoblox_username }}"
         password: "{{ infoblox_password }}"
@@ -25,6 +29,7 @@
         validate_certs: false
         return_content: true
       register: ib_network_lookup
+      when: destination_is_host
 
     - name: Show value
       ansible.builtin.debug:
