@@ -1,0 +1,10 @@
+---
+- name: ansible-vault test playbook
+  hosts: all
+  vars_files:
+   - vault/vault_fwrules.yml
+
+  tasks:
+      - name: show vault encrypted variables
+        debug: 
+          msg: "{{infoblox_username}}"
