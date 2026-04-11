@@ -1,7 +1,8 @@
 ---
 - name: ansible-vault test playbook
-  hosts: all
+  hosts: "panorama"
   connection: local
+  gather_facts: false
   vars_files:
    - vault/vault-fwrules.yml
 
