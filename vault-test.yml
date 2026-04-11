@@ -6,10 +6,15 @@
   vars_files:
    - vault/vault-fwrules.yml
 
+  vars:
+      ip_address: "{{ inventory_hostname }}"
+      username: "{{ panorama_username }}"
+      password: "{{ panorama_password }}"
+
   tasks:
     - name: Sample values
       ansible.builtin.set_fact:
-        source_ip: "10.229.57.0/28"
+        source_ip: "192.168.0.16/28"
         destination_ip: "10.221.7.1"
 
     - name: Determine if source and destination IPs are host or network
@@ -50,3 +55,24 @@
     - name: Show destination value
       ansible.builtin.debug:
         var: ib_network_lookup_dst.json[0].network
+
+    - name: Find firewall object based on input variable [1/3] - Get address objects from Panorama
+      paloaltonetworks.panos.panos_address_object:
+        provider: "{{ provider }}"
+        state: 'gathered'
+        gathered_filter: '*'
+      register: gathered_objects
+
+    - name: Find firewall object based on input variable [2/3] - Search for address object
+      ansible.builtin.set_fact:
+        source_object: >-
+          {{ gathered_objects.gathered
+            | selectattr('value', 'search', source_ip)
+            | map(attribute='value')
+            | list }}
+
+    - name: Find firewall object based on input variable [3/3] - Fail if no address object was found
+      ansible.builtin.fail:
+        msg: >-
+          No Palo Alto address_object found matching '{{ source_ip }}'
+      when: source_object | length == 0
