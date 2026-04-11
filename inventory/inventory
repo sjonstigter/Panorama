@@ -1,0 +1,5 @@
+[panorama]
+panorama.zero-days.nl
+
+[terraform]
+terraform.zero-days.nl ansible_user=sstigter ansible_connection=ssh
