@@ -1,6 +1,7 @@
 ---
 - name: ansible-vault test playbook
   hosts: all
+  connection: local
   vars_files:
    - vault/vault-fwrules.yml
 
