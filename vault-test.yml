@@ -15,19 +15,19 @@
   tasks:
     - name: Sample values
       ansible.builtin.set_fact:
-        source_ip: "192.168.0.16/28"
-        destination_ip: "10.221.7.1"
+        source_address: "192.168.0.16/28"
+        destination_address: "10.221.7.1"
 
     - name: Determine if source and destination IPs are host or network
       ansible.builtin.set_fact:
-        source_is_host: "{{ '/' not in source_ip or source_ip.endswith('/32') }}"
-        source_is_network: "{{ '/' in source_ip and not source_ip.endswith('/32') }}"
-        destination_is_host: "{{ '/' not in destination_ip or destination_ip.endswith('/32') }}"
-        destination_is_network: "{{ '/' in destination_ip and not destination_ip.endswith('/32') }}" 
+        source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
+        source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
+        destination_is_host: "{{ '/' not in destination_address or destination_address.endswith('/32') }}"
+        destination_is_network: "{{ '/' in destination_address and not destination_address.endswith('/32') }}" 
 
     - name: Find containing network for source IP
       ansible.builtin.uri:
-        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ source_ip }}&_return_fields=network"
+        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ source_address }}&_return_fields=network"
         method: GET
         user: "{{ infoblox_username }}"
         password: "{{ infoblox_password }}"
@@ -39,7 +39,7 @@
 
     - name: Find containing network for destination IP
       ansible.builtin.uri:
-        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_ip }}&_return_fields=network"
+        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_address }}&_return_fields=network"
         method: GET
         user: "{{ infoblox_username }}"
         password: "{{ infoblox_password }}"
@@ -62,18 +62,18 @@
         provider: "{{ provider }}"
         state: 'gathered'
         gathered_filter: '*'
-      register: gathered_objects
+      register: gathered_address_objects
 
     - name: Find firewall source object based on input variable [2/3] - Search for address object
       ansible.builtin.set_fact:
-        source_object: >-
-          {{ gathered_objects.gathered
-            | selectattr('value', 'search', source_ip)
+        source_address_object: >-
+          {{ gathered_address_objects.gathered
+            | selectattr('value', 'search', source_address)
             | map(attribute='name')
             | list }}
 
     - name: Find firewall source object based on input variable [3/3] - Fail if no address object was found
       ansible.builtin.fail:
         msg: >-
-          No Palo Alto address_object found matching '{{ source_ip }}'
-      when: source_object | length == 0
+          No Palo Alto address_object found matching '{{ source_address }}'
+      when: source_address_object | length == 0
