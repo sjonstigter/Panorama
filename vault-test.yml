@@ -19,6 +19,18 @@
         destination_is_host: "{{ '/' not in destination_ip or destination_ip.endswith('/32') }}"
         destination_is_network: "{{ '/' in destination_ip and not destination_ip.endswith('/32') }}" 
 
+    - name: Find containing network for source IP
+      ansible.builtin.uri:
+        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ source_ip }}&_return_fields=network,network_view"
+        method: GET
+        user: "{{ infoblox_username }}"
+        password: "{{ infoblox_password }}"
+        force_basic_auth: true
+        validate_certs: false
+        return_content: true
+      register: ib_network_lookup_src
+      when: source_is_host
+
     - name: Find containing network for destination IP
       ansible.builtin.uri:
         url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_ip }}&_return_fields=network,network_view"
@@ -31,6 +43,10 @@
       register: ib_network_lookup_dst
       when: destination_is_host
 
-    - name: Show value
+    - name: Show source value
+      ansible.builtin.debug:
+        var: ib_network_lookup_src.json[0].network
+
+    - name: Show destination value
       ansible.builtin.debug:
         var: ib_network_lookup_dst.json[0].network
