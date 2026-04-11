@@ -21,7 +21,7 @@
 
     - name: Find containing network for source IP
       ansible.builtin.uri:
-        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ source_ip }}&_return_fields=network,network_view"
+        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ source_ip }}&_return_fields=network"
         method: GET
         user: "{{ infoblox_username }}"
         password: "{{ infoblox_password }}"
@@ -33,7 +33,7 @@
 
     - name: Find containing network for destination IP
       ansible.builtin.uri:
-        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_ip }}&_return_fields=network,network_view"
+        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_ip }}&_return_fields=network"
         method: GET
         user: "{{ infoblox_username }}"
         password: "{{ infoblox_password }}"
