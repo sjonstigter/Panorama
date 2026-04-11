@@ -18,6 +18,14 @@
         source_address: "192.168.0.16/28"
         destination_address: "10.221.7.1"
 
+    - name: Show source input value
+      ansible.builtin.debug:
+        var: source_address
+
+    - name: Show destination input value
+      ansible.builtin.debug:
+        var: destination_address
+
     - name: Determine if source and destination IPs are host or network
       ansible.builtin.set_fact:
         source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
