@@ -9,8 +9,8 @@
   vars:
     source_address: "192.168.0.16/28"
     destination_address: "10.221.7.1"
-    protocol: "tcp"
-    destination_port: 8080
+    service_protocol: "tcp"
+    service_destination_port: 8082
     provider:
       ip_address: "{{ inventory_hostname }}"
       username: "{{ panorama_username }}"
@@ -137,8 +137,8 @@
         service_object: >-
           {{
             gathered_service_objects.gathered
-            | selectattr('protocol', 'equalto', protocol)
-            | selectattr('destination_port', 'equalto', destination_port | string)
+            | selectattr('protocol', 'equalto', service_protocol)
+            | selectattr('destination_port', 'equalto', service_destination_port | string)
             | map(attribute='name')
             | list
           }}
@@ -146,3 +146,10 @@
     - name: Show service object
       ansible.builtin.debug:
         var: service_object
+
+    - name: Include create service tasks on terraform host
+      ansible.builtin.include_tasks: includes/create-service.yml
+      when: service_object | length == 0
+      vars:
+        terraform_root: "/home/sstigter/panorama"
+        services_file: "/home/sstigter/panorama/services.yaml"

@@ -1,0 +1,58 @@
+---
+- name: Set service name
+  ansible.builtin.set_fact:
+    service_name: "{{ service_protocol }}-{{ service_destination_port }}"
+
+- name: Check whether services.yaml exists
+  ansible.builtin.stat:
+    path: "{{ services_file }}"
+  register: services_file_stat
+  delegate_to: terraform.zero-days.nl
+
+- name: Read services.yaml if present
+  ansible.builtin.slurp:
+    src: "{{ services_file }}"
+  register: services_file_raw
+  when: services_file_stat.stat.exists
+  delegate_to: terraform.zero-days.nl
+
+- name: Parse existing YAML content
+  ansible.builtin.set_fact:
+    services_data: >-
+      {{
+        (services_file_raw.content | b64decode | from_yaml)
+        if services_file_stat.stat.exists
+        else {'services': []}
+      }}
+
+- name: Define desired service object
+  ansible.builtin.set_fact:
+    new_service:
+      name: "{{ service_name }}"
+      protocol: "{{ service_protocol }}"
+      destination_port: "{{ service_destination_port }}"
+      description: "{{ service_description | default('Managed by AWX') }}"
+
+- name: Merge service object into services list
+  ansible.builtin.set_fact:
+    merged_services: >-
+      {{
+        (
+          services_data.services
+          | rejectattr('name', 'equalto', new_service.name)
+          | list
+        )
+        + [new_service]
+      }}
+
+- name: Build updated services data
+  ansible.builtin.set_fact:
+    updated_services_data:
+      services: "{{ merged_services }}"
+
+- name: Write services.yaml
+  ansible.builtin.copy:
+    dest: "{{ services_file }}"
+    content: "{{ updated_services_data | to_nice_yaml(indent=2, sort_keys=False) }}"
+    mode: "0644"
+  delegate_to: terraform.zero-days.nl
