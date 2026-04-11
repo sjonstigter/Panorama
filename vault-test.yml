@@ -10,7 +10,7 @@
     source_address: "192.168.0.16/28"
     destination_address: "10.221.7.1"
     protocol: "tcp"
-    destination_port: 8880
+    destination_port: 8080
     provider:
       ip_address: "{{ inventory_hostname }}"
       username: "{{ panorama_username }}"
