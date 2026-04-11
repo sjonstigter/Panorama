@@ -28,9 +28,9 @@
         force_basic_auth: true
         validate_certs: false
         return_content: true
-      register: ib_network_lookup
+      register: ib_network_lookup_dst
       when: destination_is_host
 
     - name: Show value
       ansible.builtin.debug:
-        var: ib_network_lookup.json[0].network
+        var: ib_network_lookup_dst.json[0].network
