@@ -45,11 +45,9 @@
       ansible.builtin.set_fact:
         source_address: >-
           {{
-            (ib_network_lookup_src.json | default([])) | length > 0
-            | ternary(
-                ib_network_lookup_src.json[0].network,
-                source_address
-              )
+            ib_network_lookup_src.json[0].network
+            if ((ib_network_lookup_src.json | default([]) | length) > 0)
+            else source_address
           }}
 
     - name: Find containing network for destination IP
@@ -72,11 +70,9 @@
       ansible.builtin.set_fact:
         destination_address: >-
           {{
-            (ib_network_lookup_dst.json | default([])) | length > 0
-            | ternary(
-                ib_network_lookup_dst.json[0].network,
-                destination_address
-              )
+            ib_network_lookup_dst.json[0].network
+            if ((ib_network_lookup_dst.json | default([]) | length) > 0)
+            else destination_address
           }}
 
     - name: Get address objects from Panorama
