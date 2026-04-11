@@ -69,7 +69,7 @@
         source_object: >-
           {{ gathered_objects.gathered
             | selectattr('value', 'search', source_ip)
-            | map(attribute='value')
+            | map(attribute='name')
             | list }}
 
     - name: Find firewall object based on input variable [3/3] - Fail if no address object was found
