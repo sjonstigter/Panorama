@@ -12,7 +12,7 @@
         lookup_ip: 10.221.7.1
 
     - name: show vault encrypted variables
-      debug: 
+      ansible.builtin.debug: 
         msg: "{{infoblox_username}}"
 
     - name: Find containing network for IP
