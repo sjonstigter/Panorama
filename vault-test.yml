@@ -148,7 +148,7 @@
         var: service_object
 
     - name: Include create service tasks on terraform host
-      ansible.builtin.include_tasks: includes/create-service.yml
+      ansible.builtin.include_tasks: includes/create-service-object.yml
       when: service_object | length == 0
       vars:
         terraform_root: "/home/sstigter/panorama"
