@@ -7,6 +7,7 @@
    - vault/vault-fwrules.yml
 
   vars:
+    provider:
       ip_address: "{{ inventory_hostname }}"
       username: "{{ panorama_username }}"
       password: "{{ panorama_password }}"
