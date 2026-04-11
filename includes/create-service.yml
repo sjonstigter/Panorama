@@ -56,3 +56,21 @@
     content: "{{ updated_services_data | to_nice_yaml(indent=2, sort_keys=False) }}"
     mode: "0644"
   delegate_to: terraform.zero-days.nl
+
+- name: Run terraform init
+  ansible.builtin.command: terraform init
+  args:
+    chdir: "{{ terraform_root }}"
+  delegate_to: terraform.zero-days.nl
+
+- name: Run terraform plan
+  ansible.builtin.command: terraform plan -out=tfplan
+  args:
+    chdir: "{{ terraform_root }}"
+  delegate_to: terraform.zero-days.nl
+
+- name: Run terraform apply
+  ansible.builtin.command: terraform apply -auto-approve tfplan
+  args:
+    chdir: "{{ terraform_root }}"
+  delegate_to: terraform.zero-days.nl
