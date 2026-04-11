@@ -6,6 +6,25 @@
    - vault/vault-fwrules.yml
 
   tasks:
-      - name: show vault encrypted variables
-        debug: 
-          msg: "{{infoblox_username}}"
+    - name: Set lookup_ip
+      ansible.builtin.set_fact:
+        lookup_ip: 10.221.7.0/28
+
+    - name: show vault encrypted variables
+      debug: 
+        msg: "{{infoblox_username}}"
+
+    - name: Find containing network for IP
+      ansible.builtin.uri:
+        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ lookup_ip }}&_return_fields=network,network_view"
+        method: GET
+        user: "{{ infoblox_username }}"
+        password: "{{ infoblox_password }}"
+        force_basic_auth: true
+        validate_certs: false
+        return_content: true
+      register: ib_network_lookup
+
+    - name: Show value
+      ansible.builtin.debug:
+        var: ib_network_lookup.json[0].network
