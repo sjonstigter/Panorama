@@ -1,4 +1,36 @@
 ---
+- name: Show delegated connection target
+  ansible.builtin.debug:
+    msg:
+      - "delegate_to host = terraform.zero-days.nl"
+      - "ansible_host = {{ hostvars['terraform.zero-days.nl'].ansible_host | default('terraform.zero-days.nl') }}"
+      - "ansible_user = {{ hostvars['terraform.zero-days.nl'].ansible_user | default('undefined') }}"
+
+- name: Who am I on delegated host
+  ansible.builtin.command: whoami
+  register: terraform_whoami
+  delegate_to: terraform.zero-days.nl
+  changed_when: false
+
+- name: Show pwd on delegated host
+  ansible.builtin.command: pwd
+  register: terraform_pwd
+  delegate_to: terraform.zero-days.nl
+  changed_when: false
+
+- name: Check directory on delegated host
+  ansible.builtin.command: ls -ld /home /home/sstigter /home/sstigter/panorama
+  register: terraform_ls
+  delegate_to: terraform.zero-days.nl
+  changed_when: false
+
+- name: Show delegated checks
+  ansible.builtin.debug:
+    msg:
+      - "whoami={{ terraform_whoami.stdout }}"
+      - "pwd={{ terraform_pwd.stdout }}"
+      - "{{ terraform_ls.stdout_lines }}"
+
 - name: Set service name
   ansible.builtin.set_fact:
     service_name: "{{ service_protocol }}-{{ service_destination_port }}"
