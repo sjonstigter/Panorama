@@ -9,7 +9,7 @@
   tasks:
     - name: Set lookup_ip
       ansible.builtin.set_fact:
-        lookup_ip: 10.221.7.0/28
+        lookup_ip: 10.221.7.1
 
     - name: show vault encrypted variables
       debug: 
