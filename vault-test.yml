@@ -73,11 +73,11 @@
             else source_address
           }}
 
-    - name: Set default source zone
+    - name: Set source_zone [1/2] - Set default source_zone to external
       ansible.builtin.set_fact:
         source_zone: "sddc-external"
 
-    - name: Set source_address zone
+    - name: Set source_zone [2/2] - Match source_zone from subnet list
       ansible.builtin.set_fact:
         source_zone: "{{ item.zone }}"
       loop: "{{ subnet_classes }}"
@@ -108,11 +108,11 @@
             else destination_address
           }}
 
-    - name: Set default destination zone
+    - name: Set destination_zone [1/2] - Set default destination_zone to external
       ansible.builtin.set_fact:
         destination_zone: "sddc-external"
 
-    - name: Set destination_address zone
+    - name: Set destination_zone [2/2] - Match destination_zone from subnet list
       ansible.builtin.set_fact:
         destination_zone: "{{ item.zone }}"
       loop: "{{ subnet_classes }}"
