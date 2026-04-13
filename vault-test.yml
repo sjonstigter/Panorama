@@ -79,7 +79,7 @@
       ansible.builtin.set_fact:
         source_zone: "sddc-external"
 
-    - name: Set source_zone [2/2] - Match source_zone from subnet list
+    - name: Set source_zone [2/2] - Match source_zone from subnet list and overwrite standard source_zone
       ansible.builtin.set_fact:
         source_zone: "{{ item.zone }}"
       loop: "{{ subnet_classes }}"
@@ -114,7 +114,7 @@
       ansible.builtin.set_fact:
         destination_zone: "sddc-external"
 
-    - name: Set destination_zone [2/2] - Match destination_zone from subnet list
+    - name: Set destination_zone [2/2] - Match destination_zone from subnet list and overwrite standard destination_zone
       ansible.builtin.set_fact:
         destination_zone: "{{ item.zone }}"
       loop: "{{ subnet_classes }}"
