@@ -81,7 +81,7 @@
       ansible.builtin.set_fact:
         source_zone: "{{ item.zone }}"
       loop: "{{ subnet_classes }}"
-      when: source_address | ansible.utils.network_in_network(item.cidr)
+      when: item.cidr | ansible.utils.network_in_network(source_address)
 
     - name: Find containing network for destination IP
       ansible.builtin.uri:
@@ -116,7 +116,7 @@
       ansible.builtin.set_fact:
         destination_zone: "{{ item.zone }}"
       loop: "{{ subnet_classes }}"
-      when: destination_address | ansible.utils.network_in_network(item.cidr)
+      when: item.cidr | ansible.utils.network_in_network(destination_address)
 
     - name: Get address objects from Panorama
       paloaltonetworks.panos.panos_address_object:
