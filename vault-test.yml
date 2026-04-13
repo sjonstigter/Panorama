@@ -191,4 +191,3 @@
       vars:
         terraform_root: "/home/sstigter/panorama"
         services_file: "/home/sstigter/panorama/services.yaml"
-        
