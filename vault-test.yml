@@ -16,21 +16,21 @@
       username: "{{ panorama_username }}"
       password: "{{ panorama_password }}"
     
-      subnet_classes:
-      - cidr: "10.220.0.0/16"
-        zone: "sddc-external"
-      - cidr: "10.221.0.0/16"
-        zone: "sddc-internal"
-      - cidr: "10.229.0.0/16"
-        zone: "sddc-internal"
-      - cidr: "10.205.0.0/16"
-        zone: "private"
-      - cidr: "10.226.0.0/16"
-        zone: "private"
-      - cidr: "10.227.0.0/16"
-        zone: "private"
-      - cidr: "10.53.80.0/20"
-        zone: "sddc-external"
+    subnet_classes:
+    - cidr: "10.220.0.0/16"
+      zone: "sddc-external"
+    - cidr: "10.221.0.0/16"
+      zone: "sddc-internal"
+    - cidr: "10.229.0.0/16"
+      zone: "sddc-internal"
+    - cidr: "10.205.0.0/16"
+      zone: "private"
+    - cidr: "10.226.0.0/16"
+      zone: "private"
+    - cidr: "10.227.0.0/16"
+      zone: "private"
+    - cidr: "10.53.80.0/20"
+      zone: "sddc-external"
 
   tasks:
     - name: Show source input value
@@ -73,6 +73,10 @@
             else source_address
           }}
 
+    - name: Set default source zone
+      ansible.builtin.set_fact:
+        source_zone: "sddc-external"
+
     - name: Set source_address zone
       ansible.builtin.set_fact:
         source_zone: "{{ item.zone }}"
@@ -103,6 +107,10 @@
             if ((ib_network_lookup_dst.json | default([]) | length) > 0)
             else destination_address
           }}
+
+    - name: Set default destination zone
+      ansible.builtin.set_fact:
+        destination_zone: "sddc-external"
 
     - name: Set destination_address zone
       ansible.builtin.set_fact:
