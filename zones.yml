@@ -47,23 +47,23 @@
       ansible.builtin.debug:
         var: destination_address
 
-    - name: Set source device_group
+    - name: Select source network type
       ansible.builtin.set_fact:
         network_source_type: "{{ item.type }}"
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(source_address)
 
-    - name: Show source device_group
+    - name: Show source network type
       ansible.builtin.debug:
         var: network_source_type
 
-    - name: Set destination device_group
+    - name: Select destination network type
       ansible.builtin.set_fact:
         network_destination_type: "{{ item.type }}"
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(destination_address)
 
-    - name: Show destination device_group
+    - name: Show destination network type
       ansible.builtin.debug:
         var: network_destination_type
 
