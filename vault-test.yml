@@ -98,14 +98,15 @@
     - name: Set source_zone [2/2] - Match source_zone from subnet list and overwrite standard source_zone
       ansible.builtin.set_fact:
         source_zone: "{{ item.zone }}"
-      loop: "{{ subnet_classes }}"
-      when: item.cidr | ansible.utils.network_in_network(source_address)
-
-    - name: Select source network type
-      ansible.builtin.set_fact:
         network_source_type: "{{ item.type }}"
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(source_address)
+
+#    - name: Select source network type
+#      ansible.builtin.set_fact:
+#        network_source_type: "{{ item.type }}"
+#      loop: "{{ subnet_classes }}"
+#      when: item.cidr | ansible.utils.network_in_network(source_address)
 
     - name: Find containing network for destination IP
       ansible.builtin.uri:
@@ -139,14 +140,15 @@
     - name: Set destination_zone [2/2] - Match destination_zone from subnet list and overwrite standard destination_zone
       ansible.builtin.set_fact:
         destination_zone: "{{ item.zone }}"
-      loop: "{{ subnet_classes }}"
-      when: item.cidr | ansible.utils.network_in_network(destination_address)
-
-    - name: Select destination network type
-      ansible.builtin.set_fact:
         network_destination_type: "{{ item.type }}"
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(destination_address)
+
+#    - name: Select destination network type
+#      ansible.builtin.set_fact:
+#        network_destination_type: "{{ item.type }}"
+#      loop: "{{ subnet_classes }}"
+#      when: item.cidr | ansible.utils.network_in_network(destination_address)
 
     - name: Determine device_group based on network_type from subnet_classes
       ansible.builtin.set_fact:
