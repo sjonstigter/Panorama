@@ -18,7 +18,7 @@
       ip_address: "{{ inventory_hostname }}"
       username: "{{ panorama_username }}"
       password: "{{ panorama_password }}"
-    
+
     subnet_classes:
     - cidr: "10.0.0.0/8"
       zone: "sddc-external"
@@ -67,7 +67,7 @@
         source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
         source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
         destination_is_host: "{{ '/' not in destination_address or destination_address.endswith('/32') }}"
-        destination_is_network: "{{ '/' in destination_address and not destination_address.endswith('/32') }}" 
+        destination_is_network: "{{ '/' in destination_address and not destination_address.endswith('/32') }}"
 
     - name: Find network for host source IP
       ansible.builtin.uri:
@@ -98,6 +98,7 @@
     - name: Set source_zone [1/2] - Set default source_zone to external
       ansible.builtin.set_fact:
         source_zone: "sddc-external"
+        network_source_type: "external"
 
     - name: Set source_zone [2/2] - Match source_zone from subnet list and overwrite standard source_zone
       ansible.builtin.set_fact:
@@ -135,6 +136,7 @@
     - name: Set destination_zone [1/2] - Set default destination_zone to external
       ansible.builtin.set_fact:
         destination_zone: "sddc-external"
+        network_destination_type: "external"
 
     - name: Set destination_zone [2/2] - Match destination_zone from subnet list and overwrite standard destination_zone
       ansible.builtin.set_fact:
