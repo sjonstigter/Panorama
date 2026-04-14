@@ -67,7 +67,7 @@
       ansible.builtin.debug:
         var: network_destination_type
 
-    - name: Determine device_group
+    - name: Determine device_group based on network_type from subnet_classes
       ansible.builtin.set_fact:
         device_group: >-
           {%- set pair = [network_source_type, network_destination_type] | sort -%}
