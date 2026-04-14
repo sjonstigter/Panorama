@@ -1,4 +1,11 @@
-    
+---
+- name: resolve devicegroup test
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    source_address: "10.221.7.0/28"
+    destination_address: "10.221.10.0/28"
     subnet_classes:
     - cidr: "10.0.0.0/8"
       zone: "sddc-external"
@@ -30,3 +37,52 @@
     - cidr: "192.168.0.0/16"
       zone: "any"
       type: "private-internal"
+
+  tasks:
+    - name: Show source_address
+      ansible.builtin.debug:
+        var: source_address
+
+    - name: Show destination_address
+      ansible.builtin.debug:
+        var: destination_address
+
+    - name: Set source device_group
+      ansible.builtin.set_fact:
+        network_source_type: "{{ item.type }}"
+      loop: "{{ subnet_classes }}"
+      when: item.cidr | ansible.utils.network_in_network(source_address)
+
+    - name: Show source device_group
+      ansible.builtin.debug:
+        var: network_source_type
+
+    - name: Set destination device_group
+      ansible.builtin.set_fact:
+        network_destination_type: "{{ item.type }}"
+      loop: "{{ subnet_classes }}"
+      when: item.cidr | ansible.utils.network_in_network(destination_address)
+
+    - name: Show destination device_group
+      ansible.builtin.debug:
+        var: network_destination_type
+
+    - name: Determine device_group
+      ansible.builtin.set_fact:
+        device_group: >-
+          {%- set pair = [network_source_type, network_destination_type] | sort -%}
+          {%- if pair == ['private-external', 'private-internal'] -%}
+          ['sg_external']
+          {%- elif pair == ['private-internal', 'private-internal'] -%}
+          ['sg_internal']
+          {%- elif pair == ['private-azure', 'private-internal'] -%}
+          ['sg_external', 'sg_azure']
+          {%- elif pair == ['private-azure', 'private-azure'] -%}
+          ['sg_azure']
+          {%- else -%}
+          []
+          {%- endif -%}
+
+    - name: Show device_group
+      ansible.builtin.debug:
+        var: device_group
