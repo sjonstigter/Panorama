@@ -138,7 +138,7 @@
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(destination_address)
 
-    - name: Determine device_group based on network_type from subnet_classes
+    - name: Determine device_group based on network type from subnet_classes
       ansible.builtin.set_fact:
         device_group: >-
           {%- set pair = [network_source_type, network_destination_type] | sort -%}
