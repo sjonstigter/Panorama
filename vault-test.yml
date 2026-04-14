@@ -13,6 +13,7 @@
     service_destination_port: '8082'
     infoblox_host: infoblox.zero-days.nl
     infoblox_wapi_version: v2.12.3
+    debug: true
     provider:
       ip_address: "{{ inventory_hostname }}"
       username: "{{ panorama_username }}"
@@ -54,10 +55,12 @@
     - name: Show source input value
       ansible.builtin.debug:
         var: source_address
+      when: debug
 
     - name: Show destination input value
       ansible.builtin.debug:
         var: destination_address
+      when: debug
 
     - name: Determine if source and destination IPs are host or network
       ansible.builtin.set_fact:
@@ -81,6 +84,7 @@
     - name: Show source value
       ansible.builtin.debug:
         var: ib_network_lookup_src.json[0].network
+      when: debug
 
     - name: Set source_address to Infoblox result if exists
       ansible.builtin.set_fact:
@@ -117,6 +121,7 @@
     - name: Show destination value
       ansible.builtin.debug:
         var: ib_network_lookup_dst.json[0].network
+      when: debug
 
     - name: Set destination_address to Infoblox result if exists
       ansible.builtin.set_fact:
@@ -192,10 +197,12 @@
     - name: Show source address object
       ansible.builtin.debug:
         var: source_address_object
+      when: debug
 
     - name: Show destination address object
       ansible.builtin.debug:
         var: destination_address_object
+      when: debug
 
     - name: Get service objects from Panorama
       paloaltonetworks.panos.panos_service_object:
@@ -218,6 +225,7 @@
     - name: Show service object
       ansible.builtin.debug:
         var: service_object
+      when: debug
 
     - name: Include create service tasks on terraform host
       ansible.builtin.include_tasks: includes/create-service-object.yml
