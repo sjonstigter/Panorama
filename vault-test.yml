@@ -19,34 +19,34 @@
     subnet_classes:
     - cidr: "10.0.0.0/8"
       zone: "sddc-external"
-      type: "private-external"
+      type: "external"
     - cidr: "172.16.0.0/12"
       zone: "sddc-external"
-      type: "private-external"
+      type: "external"
     - cidr: "10.220.0.0/16"
       zone: "sddc-external"
-      type: "private-internal"
+      type: "internal"
     - cidr: "10.221.0.0/16"
       zone: "sddc-internal"
-      type: "private-internal"
+      type: "internal"
     - cidr: "10.229.0.0/16"
       zone: "sddc-internal"
-      type: "private-internal"
+      type: "internal"
     - cidr: "10.205.0.0/16"
       zone: "private"
-      type: "private-azure"
+      type: "azure"
     - cidr: "10.226.0.0/16"
       zone: "private"
-      type: "private-azure"
+      type: "azure"
     - cidr: "10.227.0.0/16"
       zone: "private"
-      type: "private-azure"
+      type: "azure"
     - cidr: "10.53.80.0/20"
       zone: "sddc-oob"
-      type: "private-external"
+      type: "external"
     - cidr: "192.168.0.0/16"
       zone: "any"
-      type: "private-internal"
+      type: "internal"
 
   tasks:
     - name: Show source input value
@@ -150,13 +150,13 @@
       ansible.builtin.set_fact:
         device_group: >-
           {%- set pair = [network_source_type, network_destination_type] | sort -%}
-          {%- if pair == ['private-external', 'private-internal'] -%}
+          {%- if pair == ['external', 'internal'] -%}
           ['sg_external']
-          {%- elif pair == ['private-internal', 'private-internal'] -%}
+          {%- elif pair == ['internal', 'internal'] -%}
           ['sg_internal']
-          {%- elif pair == ['private-azure', 'private-internal'] -%}
+          {%- elif pair == ['azure', 'internal'] -%}
           ['sg_external', 'sg_azure']
-          {%- elif pair == ['private-azure', 'private-azure'] -%}
+          {%- elif pair == ['azure', 'azure'] -%}
           ['sg_azure']
           {%- else -%}
           ['ERR-DG-NOT-FOUND']
