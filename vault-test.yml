@@ -11,6 +11,8 @@
     destination_address: "10.221.7.1"
     service_protocol: "tcp"
     service_destination_port: '8082'
+    infoblox_host: infoblox.zero-days.nl
+    infoblox_wapi_version: v2.12.3
     provider:
       ip_address: "{{ inventory_hostname }}"
       username: "{{ panorama_username }}"
@@ -66,7 +68,7 @@
 
     - name: Find containing network for source IP
       ansible.builtin.uri:
-        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ source_address }}&_return_fields=network"
+        url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ source_address }}&_return_fields=network"
         method: GET
         user: "{{ infoblox_username }}"
         password: "{{ infoblox_password }}"
@@ -107,7 +109,7 @@
 
     - name: Find containing network for destination IP
       ansible.builtin.uri:
-        url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_address }}&_return_fields=network"
+        url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ destination_address }}&_return_fields=network"
         method: GET
         user: "{{ infoblox_username }}"
         password: "{{ infoblox_password }}"
