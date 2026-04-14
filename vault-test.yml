@@ -17,22 +17,36 @@
       password: "{{ panorama_password }}"
     
     subnet_classes:
+    - cidr: "10.0.0.0/8"
+      zone: "sddc-external"
+      type: "private-external"
+    - cidr: "172.16.0.0/12"
+      zone: "sddc-external"
+      type: "private-external"
     - cidr: "10.220.0.0/16"
       zone: "sddc-external"
+      type: "private-internal"
     - cidr: "10.221.0.0/16"
       zone: "sddc-internal"
+      type: "private-internal"
     - cidr: "10.229.0.0/16"
       zone: "sddc-internal"
+      type: "private-internal"
     - cidr: "10.205.0.0/16"
       zone: "private"
+      type: "private-azure"
     - cidr: "10.226.0.0/16"
       zone: "private"
+      type: "private-azure"
     - cidr: "10.227.0.0/16"
       zone: "private"
+      type: "private-azure"
     - cidr: "10.53.80.0/20"
-      zone: "sddc-external"
+      zone: "sddc-oob"
+      type: "private-external"
     - cidr: "192.168.0.0/16"
-      zone: "sddc-internal"
+      zone: "any"
+      type: "private-internal"
 
   tasks:
     - name: Show source input value
@@ -85,6 +99,12 @@
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(source_address)
 
+    - name: Select source network type
+      ansible.builtin.set_fact:
+        network_source_type: "{{ item.type }}"
+      loop: "{{ subnet_classes }}"
+      when: item.cidr | ansible.utils.network_in_network(source_address)
+
     - name: Find containing network for destination IP
       ansible.builtin.uri:
         url: "https://infoblox.zero-days.nl/wapi/v2.12.3/network?network_view=default&contains_address={{ destination_address }}&_return_fields=network"
@@ -119,6 +139,28 @@
         destination_zone: "{{ item.zone }}"
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(destination_address)
+
+    - name: Select destination network type
+      ansible.builtin.set_fact:
+        network_destination_type: "{{ item.type }}"
+      loop: "{{ subnet_classes }}"
+      when: item.cidr | ansible.utils.network_in_network(destination_address)
+
+    - name: Determine device_group based on network_type from subnet_classes
+      ansible.builtin.set_fact:
+        device_group: >-
+          {%- set pair = [network_source_type, network_destination_type] | sort -%}
+          {%- if pair == ['private-external', 'private-internal'] -%}
+          ['sg_external']
+          {%- elif pair == ['private-internal', 'private-internal'] -%}
+          ['sg_internal']
+          {%- elif pair == ['private-azure', 'private-internal'] -%}
+          ['sg_external', 'sg_azure']
+          {%- elif pair == ['private-azure', 'private-azure'] -%}
+          ['sg_azure']
+          {%- else -%}
+          []
+          {%- endif -%}
 
     - name: Get address objects from Panorama
       paloaltonetworks.panos.panos_address_object:
