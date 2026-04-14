@@ -158,7 +158,7 @@
           {%- elif pair == ['azure', 'azure'] -%}
           ['sg_azure']
           {%- else -%}
-          ['ERR-DG-NOT-FOUND']
+          ['ERR-DG-NOT-FOUND-OR-INVALID']
           {%- endif -%}
 
     - name: Get address objects from Panorama
