@@ -102,12 +102,6 @@
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(source_address)
 
-#    - name: Select source network type
-#      ansible.builtin.set_fact:
-#        network_source_type: "{{ item.type }}"
-#      loop: "{{ subnet_classes }}"
-#      when: item.cidr | ansible.utils.network_in_network(source_address)
-
     - name: Find containing network for destination IP
       ansible.builtin.uri:
         url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ destination_address }}&_return_fields=network"
@@ -143,12 +137,6 @@
         network_destination_type: "{{ item.type }}"
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(destination_address)
-
-#    - name: Select destination network type
-#      ansible.builtin.set_fact:
-#        network_destination_type: "{{ item.type }}"
-#      loop: "{{ subnet_classes }}"
-#      when: item.cidr | ansible.utils.network_in_network(destination_address)
 
     - name: Determine device_group based on network_type from subnet_classes
       ansible.builtin.set_fact:
