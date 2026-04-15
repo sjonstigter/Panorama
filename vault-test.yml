@@ -96,14 +96,14 @@
             else source_address
           }}
 
-    - name: Set source_zone [1/2] - Set default source_zone to external - If network is not in subnet_classes assume it is external
+    - name: Set source_zones [1/2] - Set default source_zones to external - If network is not in subnet_classes assume it is external
       ansible.builtin.set_fact:
-        source_zone: "sddc-external"
+        source_zones: "sddc-external"
         network_source_type: "external"
 
-    - name: Set source_zone [2/2] - Match source_zone from subnet list and overwrite standard source_zone and type
+    - name: Set source_zones [2/2] - Match source_zones from subnet list and overwrite standard source_zones and type
       ansible.builtin.set_fact:
-        source_zone: "{{ item.zone }}"
+        source_zones: "{{ item.zone }}"
         network_source_type: "{{ item.type }}"
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(source_address)
@@ -134,14 +134,14 @@
             else destination_address
           }}
 
-    - name: Set destination_zone [1/2] - Set default destination_zone to external - If network is not in subnet_classes assume it is external
+    - name: Set destination_zones [1/2] - Set default destination_zones to external - If network is not in subnet_classes assume it is external
       ansible.builtin.set_fact:
-        destination_zone: "sddc-external"
+        destination_zones: "sddc-external"
         network_destination_type: "external"
 
-    - name: Set destination_zone [2/2] - Match destination_zone from subnet list and overwrite standard destination_zone and type
+    - name: Set destination_zones [2/2] - Match destination_zones from subnet list and overwrite standard destination_zones and type
       ansible.builtin.set_fact:
-        destination_zone: "{{ item.zone }}"
+        destination_zones: "{{ item.zone }}"
         network_destination_type: "{{ item.type }}"
       loop: "{{ subnet_classes }}"
       when: item.cidr | ansible.utils.network_in_network(destination_address)

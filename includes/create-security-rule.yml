@@ -33,21 +33,20 @@
         new_rule:
           name: "{{ rule_name }}"
           description: "{{ description }}"
-          audit_comment: "{{ audit_comment }}"
           device_group: "{{ device_group }}"
           source_zones: "{{ source_zones }}"
           source_addresses:
-            - "{{ source_address_name }}"
+            - "{{ source_address_object }}"
           source_users: "{{ source_users | default(['any']) }}"
           destination_zones: "{{ destination_zones }}"
           destination_addresses:
-            - "{{ destination_address_name }}"
+            - "{{ destination_address_object }}"
           applications: "{{ applications }}"
           services:
-            - "{{ service_name }}"
+            - "{{ service_object }}"
           categories: "{{ categories | default(['any']) }}"
           tags: "{{ tags }}"
-          group: "{{ group }}"
+          group: "{{ group }}| default(['any']) }}"
           log_setting: "{{ log_setting }}"
           action: "{{ action }}"
 
