@@ -14,6 +14,7 @@
     infoblox_host: infoblox.zero-days.nl
     infoblox_wapi_version: v2.12.3
     debug: true
+    policy: false
     provider:
       ip_address: "{{ inventory_hostname }}"
       username: "{{ panorama_username }}"
@@ -178,11 +179,10 @@
 
     - name: Find firewall source object based on input variable [2/2] - Create address object if none was found
       ansible.builtin.include_tasks: includes/create-address-object.yml
-      when: service_object | length == 0
+      when: source_address_object | length == 0
       vars:
         terraform_root: "/home/sstigter/panorama"
-        services_file: "/home/sstigter/panorama/services.yaml"
-      when: source_address_object | length == 0
+        address_objects_file: "{{ terraform_root }}/address_objects.yaml"
 
     - name: Find firewall destination object based on input variable [1/2] - Search for address object
       ansible.builtin.set_fact:
@@ -194,11 +194,10 @@
 
     - name: Find firewall destination object based on input variable [2/2] - Create address object if none was found
       ansible.builtin.include_tasks: includes/create-address-object.yml
-      when: service_object | length == 0
+      when: destination_address_object | length == 0
       vars:
         terraform_root: "/home/sstigter/panorama"
-        services_file: "/home/sstigter/panorama/services.yaml"
-      when: destination_address_object | length == 0
+        address_objects_file: "{{ terraform_root }}/address_objects.yaml"
 
     - name: Show source address object
       ansible.builtin.debug:
@@ -238,4 +237,13 @@
       when: service_object | length == 0
       vars:
         terraform_root: "/home/sstigter/panorama"
-        services_file: "/home/sstigter/panorama/services.yaml"
+        services_file: "{{ terraform_root }}/services.yaml"
+
+    - name: Create security rule
+      ansible.builtin.include_tasks: includes/create-security-rule.yml
+      when: source_address_object | length == 0
+      vars:
+        terraform_root: "/home/sstigter/panorama"
+        policies_dir: "{{ terraform_root }}/policies"
+        policy_file: "{{ policies_dir }}/{{ group_tag }}.yaml"
+      when: policy

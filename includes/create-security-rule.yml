@@ -1,0 +1,97 @@
+    - name: Ensure policies directory exists
+      ansible.builtin.file:
+        path: "{{ policies_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Check whether policy file exists
+      ansible.builtin.stat:
+        path: "{{ policy_file }}"
+      register: policy_file_stat
+
+    - name: Read policy file if present
+      ansible.builtin.slurp:
+        src: "{{ policy_file }}"
+      register: policy_file_raw
+      when: policy_file_stat.stat.exists
+
+    - name: Parse existing YAML content
+      ansible.builtin.set_fact:
+        policy_data: >-
+          {{
+            (policy_file_raw.content | b64decode | from_yaml)
+            if policy_file_stat.stat.exists
+            else {
+              'group_tag': group_tag,
+              'position_keyword': (rulebase_position_keyword | default('bottom')),
+              'rules': []
+            }
+          }}
+
+    - name: Define desired firewall rule
+      ansible.builtin.set_fact:
+        new_rule:
+          name: "{{ rule_name }}"
+          description: "{{ description }}"
+          audit_comment: "{{ audit_comment }}"
+          device_group: "{{ device_group }}"
+          source_zones: "{{ source_zones }}"
+          source_addresses:
+            - "{{ source_address_name }}"
+          source_users: "{{ source_users | default(['any']) }}"
+          destination_zones: "{{ destination_zones }}"
+          destination_addresses:
+            - "{{ destination_address_name }}"
+          applications: "{{ applications }}"
+          services:
+            - "{{ service_name }}"
+          categories: "{{ categories | default(['any']) }}"
+          tags: "{{ tags }}"
+          group: "{{ group }}"
+          log_setting: "{{ log_setting }}"
+          action: "{{ action }}"
+
+    - name: Merge rule into policy rules list
+      ansible.builtin.set_fact:
+        merged_rules: >-
+          {{
+            (
+              policy_data.rules
+              | rejectattr('name', 'equalto', new_rule.name)
+              | list
+            )
+            + [new_rule]
+          }}
+
+    - name: Build updated policy data
+      ansible.builtin.set_fact:
+        updated_policy_data:
+          group_tag: "{{ group_tag }}"
+          # position_keyword: "{{ rulebase_position_keyword | default(policy_data.position_keyword | default('bottom')) }}"
+          rules: "{{ merged_rules }}"
+
+    - name: Write policy file
+      ansible.builtin.copy:
+        dest: "{{ policy_file }}"
+        content: >-
+          {{
+            updated_policy_data
+            | to_nice_yaml(indent=2, sort_keys=False)
+            | regex_replace('\n- name:', '\n\n- name:')
+          }}
+        mode: "0644"
+
+    - name: Run terraform init
+      ansible.builtin.command: terraform init
+      args:
+        chdir: "{{ terraform_root }}"
+    
+    - name: Run terraform plan
+      ansible.builtin.command: terraform plan -out=tfplan
+      args:
+        chdir: "{{ terraform_root }}"
+    
+    - name: Run terraform apply
+      ansible.builtin.command: terraform apply -auto-approve tfplan
+      args:
+        chdir: "{{ terraform_root }}"
