@@ -1,20 +1,20 @@
 ---
-- name: Set source host address object
+- name: Set source host address object name
   ansible.builtin.set_fact:
     address_object_name: "ip_{{ source_address | replace('/','_') }}"
   when: source_is_host
 
-- name: Set source network address object
+- name: Set source network address object name
   ansible.builtin.set_fact:
     address_object_name: "net_{{ source_address | replace('/','_') }}"
   when: source_is_network
 
-- name: Set destination host address object
+- name: Set destination host address object name
   ansible.builtin.set_fact:
     address_object_name: "ip_{{ destination_address | replace('/','_') }}"
   when: destination_is_host
 
-- name: Set destination network address object
+- name: Set destination network address object name
   ansible.builtin.set_fact:
     address_object_name: "net_{{ destination_address | replace('/','_') }}"
   when: destination_is_network

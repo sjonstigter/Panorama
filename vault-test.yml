@@ -176,10 +176,12 @@
             | map(attribute='name')
             | list }}
 
-    - name: Find firewall source object based on input variable [2/2] - Fail if no address object was found
-      ansible.builtin.fail:
-        msg: >-
-          No Palo Alto address_object found matching '{{ source_address }}'
+    - name: Find firewall source object based on input variable [2/2] - Create address object if none was found
+      ansible.builtin.include_tasks: includes/create-address-object.yml
+      when: service_object | length == 0
+      vars:
+        terraform_root: "/home/sstigter/panorama"
+        services_file: "/home/sstigter/panorama/services.yaml"
       when: source_address_object | length == 0
 
     - name: Find firewall destination object based on input variable [1/2] - Search for address object
@@ -190,10 +192,12 @@
             | map(attribute='name')
             | list }}
 
-    - name: Find firewall destination object based on input variable [2/2] - Fail if no address object was found
-      ansible.builtin.fail:
-        msg: >-
-          No Palo Alto address_object found matching '{{ destination_address }}'
+    - name: Find firewall destination object based on input variable [2/2] - Create address object if none was found
+      ansible.builtin.include_tasks: includes/create-address-object.yml
+      when: service_object | length == 0
+      vars:
+        terraform_root: "/home/sstigter/panorama"
+        services_file: "/home/sstigter/panorama/services.yaml"
       when: destination_address_object | length == 0
 
     - name: Show source address object
