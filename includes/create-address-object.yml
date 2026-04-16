@@ -100,3 +100,26 @@
   args:
     chdir: "{{ terraform_root }}"
   delegate_to: terraform.zero-days.nl
+
+- name: Run lookup again to get address objects from Panorama
+  paloaltonetworks.panos.panos_address_object:
+    provider: "{{ provider }}"
+    state: 'gathered'
+    gathered_filter: '*'
+  register: gathered_address_objects
+
+- name: Find firewall source object based on input variable - Search for address object
+  ansible.builtin.set_fact:
+    source_address_object: >-
+      {{ gathered_address_objects.gathered
+        | selectattr('value', 'search', source_address)
+        | map(attribute='name')
+        | list }}
+
+- name: Find firewall destination object based on input variable - Search for address object
+  ansible.builtin.set_fact:
+    destination_address_object: >-
+      {{ gathered_address_objects.gathered
+        | selectattr('value', 'search', destination_address)
+        | map(attribute='name')
+        | list }}
