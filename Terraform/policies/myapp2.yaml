@@ -1,5 +1,4 @@
 group_tag: myapp2
-position_keyword: bottom
 rules:
 
 - name: myapp2 - api to db acc

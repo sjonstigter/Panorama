@@ -101,6 +101,7 @@
     chdir: "{{ terraform_root }}"
   delegate_to: terraform.zero-days.nl
 
+# Turn to lookup module
 - name: Run lookup again to get address objects from Panorama
   paloaltonetworks.panos.panos_address_object:
     provider: "{{ provider }}"
