@@ -1,7 +1,7 @@
 ---
 - name: Set security policy rule name
   ansible.builtin.set_fact:
-    rule_name: "{{ source_address_object[0].split(' - ')[0] }} to {{ destination_address_object[0].split(' - ')[0] }} - {{ service_object }}"
+    rule_name: "{{ source_address_object[0].split(' - ')[0] }} to {{ destination_address_object[0].split(' - ')[0] }}
 
 - name: Ensure policies directory exists
   ansible.builtin.file:
@@ -54,7 +54,7 @@
         "{{ service_object }}"
       categories: "{{ categories | default(['any']) }}"
       tags: "{{ tags | default(['sddc - automated']) }}"
-      group: "{{ group | default('any') }}"
+      group: "{{ group | default('sddc-default-edge') }}"
       log_setting: "{{ log_setting | default('forward-to-panorama') }}"
       action: "{{ action }}"
 
