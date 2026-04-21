@@ -148,17 +148,18 @@
       when: item.cidr | ansible.utils.network_in_network(destination_address)
 
     - name: Determine device_group based on network type from subnet_classes
+      # Note sg_name vs ss-name (underscore) when setting final device_group names
       ansible.builtin.set_fact:
         device_group: >-
           {%- set pair = [network_source_type, network_destination_type] | sort -%}
           {%- if pair == ['external', 'internal'] -%}
-          ['ss_external']
+          ['ss-external']
           {%- elif pair == ['internal', 'internal'] -%}
-          ['ss_internal']
+          ['ss-internal']
           {%- elif pair == ['azure', 'internal'] -%}
-          ['ss_external', 'ss_azure']
+          ['ss-external', 'ss-azure']
           {%- elif pair == ['azure', 'azure'] -%}
-          ['ss_azure']
+          ['ss-azure']
           {%- else -%}
           ['ERR-DG-NOT-FOUND-OR-INVALID']
           {%- endif -%}
