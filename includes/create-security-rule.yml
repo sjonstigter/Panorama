@@ -41,7 +41,7 @@
     new_rule:
       name: "{{ rule_name }}"
       description: "{{ description }}"
-      device_group: "{{ device_group | first}}"
+      device_group: "{{ (device_group | first) | string }}"
       source_zones: "{{ [source_zones] }}"
       source_addresses:
         "{{ source_address_object }}"
