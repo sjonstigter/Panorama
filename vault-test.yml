@@ -53,20 +53,6 @@
       type: "internal"
 
   tasks:
-    - name: Parse AWX JSON input
-      ansible.builtin.set_fact:
-        parsed_data: "{{ input_json | from_json }}"
-
-    - name: Convert input variables to internal variables
-      ansible.builtin.set_fact:
-        description: "{{ Description | lower }}"
-        source_address: "{{ item['Source IP adress(es)'] }}"
-        destination_address: "{{ item['Destination IP adress(es)'] }}"
-        service_protocol: "{{ Protocol | lower }}"
-        service_destination_port: "{{ item['Port(s)'] }}"
-        action: "{{ Action | lower }}"
-      loop: "{{ parsed_data }}"
-
     - name: Show source input value
       ansible.builtin.debug:
         var: source_address
