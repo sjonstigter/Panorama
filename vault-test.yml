@@ -56,10 +56,10 @@
     - name: Convert input variables to internal variables
       ansible.builtin.set_fact:
         description: "{{ Description | lower }}"
-        source_address: "{{ Source IP adress(es) }}"
-        destination_address: "{{ Destination IP adress(es) }}"
+        source_address: "{{ item['Source IP adress(es)'] }}"
+        destination_address: "{{ item['Destination IP adress(es)'] }}"
         service_protocol: "{{ Protocol | lower }}"
-        service_destination_port: "{{ Port(s) }}"
+        service_destination_port: "{{ item['Port(s)'] }}"
         action: "{{ Action | lower }}"
 
     - name: Show source input value
