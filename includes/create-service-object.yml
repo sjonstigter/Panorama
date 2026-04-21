@@ -87,7 +87,7 @@
     service_object: >-
       {{
         gathered_service_objects.gathered
-        | selectattr('protocol', 'equalto', service_protocol)
+        | selectattr('protocol', 'equalto', service_protocol | lower)
         | selectattr('destination_port', 'equalto', service_destination_port | string)
         | map(attribute='name')
         | list

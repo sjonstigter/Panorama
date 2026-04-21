@@ -54,7 +54,7 @@
         - "{{ service_object }}"
       categories: "{{ categories | default(['any']) }}"
       tags: "{{ tags | default(['sddc - automated']) }}"
-      group: "{{ device_group }}"
+      group: "{{ group | default(['any']) }}"
       log_setting: "{{ log_setting | default(['forward-to-panorama']) }}"
       action: "{{ action }}"
 
