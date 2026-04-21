@@ -239,11 +239,11 @@
         terraform_root: "/home/sstigter/panorama"
         services_file: "{{ terraform_root }}/services.yaml"
 
-#    - name: Create security rule
-#      ansible.builtin.include_tasks: includes/create-security-rule.yml
-#      when: source_address_object | length == 0
-#      vars:
-#        terraform_root: "/home/sstigter/panorama"
-#        policies_dir: "{{ terraform_root }}/policies"
-#        policy_file: "{{ policies_dir }}/{{ group_tag }}.yaml"
+    - name: Create security rule
+      ansible.builtin.include_tasks: includes/create-security-rule.yml
+      when: source_address_object | length == 0
+      vars:
+        terraform_root: "/home/sstigter/panorama"
+        policies_dir: "{{ terraform_root }}/policies"
+        policy_file: "{{ policies_dir }}/{{ group_tag }}.yaml"
 #      when: policy
