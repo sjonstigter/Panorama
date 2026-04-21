@@ -152,13 +152,13 @@
         device_group: >-
           {%- set pair = [network_source_type, network_destination_type] | sort -%}
           {%- if pair == ['external', 'internal'] -%}
-          ['sg_external']
+          ['ss_external']
           {%- elif pair == ['internal', 'internal'] -%}
-          ['sg_internal']
+          ['ss_internal']
           {%- elif pair == ['azure', 'internal'] -%}
-          ['sg_external', 'sg_azure']
+          ['ss_external', 'ss_azure']
           {%- elif pair == ['azure', 'azure'] -%}
-          ['sg_azure']
+          ['ss_azure']
           {%- else -%}
           ['ERR-DG-NOT-FOUND-OR-INVALID']
           {%- endif -%}
