@@ -41,12 +41,14 @@
     new_rule:
       name: "{{ rule_name }}"
       description: "{{ description }}"
-      device_group: "{{ device_group }}"
-      source_zones: "{{ source_zones }}"
+      device_group: "{{ device_group | first}}"
+      source_zones: 
+      - "{{ source_zones }}"
       source_addresses:
         "{{ source_address_object }}"
       source_users: "{{ source_users | default(['any']) }}"
-      destination_zones: "{{ destination_zones }}"
+      destination_zones: 
+      - "{{ destination_zones }}"
       destination_addresses:
         "{{ destination_address_object }}"
       applications: "{{ applications | default(['any']) }}"
