@@ -1,7 +1,7 @@
 ---
 - name: Set service name
   ansible.builtin.set_fact:
-    service_name: "{{ service_protocol }}-{{ service_destination_port }}"
+    service_name: "{{ service_protocol | lower }}-{{ service_destination_port }}"
 
 - name: Check whether services.yaml exists
   ansible.builtin.stat:
@@ -29,7 +29,7 @@
   ansible.builtin.set_fact:
     new_service:
       name: "{{ service_name }}"
-      protocol: "{{ service_protocol }}"
+      protocol: "{{ service_protocol | lower }}"
       destination_port: "{{ service_destination_port }}"
       description: "{{ service_description | default('Managed by AWX') }}"
 
