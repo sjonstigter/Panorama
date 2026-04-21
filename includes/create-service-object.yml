@@ -74,3 +74,26 @@
   args:
     chdir: "{{ terraform_root }}"
   delegate_to: terraform.zero-days.nl
+
+- name: Rerun Get service objects from Panorama
+  paloaltonetworks.panos.panos_service_object:
+    provider: "{{ provider }}"
+    state: 'gathered'
+    gathered_filter: '*'
+  register: gathered_service_objects
+
+- name: Rerun Find matching service object names
+  ansible.builtin.set_fact:
+    service_object: >-
+      {{
+        gathered_service_objects.gathered
+        | selectattr('protocol', 'equalto', service_protocol)
+        | selectattr('destination_port', 'equalto', service_destination_port | string)
+        | map(attribute='name')
+        | list
+      }}
+
+- name: Rerun Show service object
+  ansible.builtin.debug:
+    var: service_object
+  when: debug
