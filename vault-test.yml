@@ -53,6 +53,10 @@
       type: "internal"
 
   tasks:
+    - name: Parse AWX JSON input
+      ansible.builtin.set_fact:
+        parsed_data: "{{ input_json | from_json }}"
+
     - name: Convert input variables to internal variables
       ansible.builtin.set_fact:
         description: "{{ Description | lower }}"
@@ -61,6 +65,7 @@
         service_protocol: "{{ Protocol | lower }}"
         service_destination_port: "{{ item['Port(s)'] }}"
         action: "{{ Action | lower }}"
+      loop: "{{ parsed_data }}"
 
     - name: Show source input value
       ansible.builtin.debug:
@@ -248,11 +253,11 @@
         terraform_root: "/home/sstigter/panorama"
         services_file: "{{ terraform_root }}/services.yaml"
 
-    - name: Create security rule
-      ansible.builtin.include_tasks: includes/create-security-rule.yml
-      when: source_address_object | length == 0
-      vars:
-        terraform_root: "/home/sstigter/panorama"
-        policies_dir: "{{ terraform_root }}/policies"
-        policy_file: "{{ policies_dir }}/{{ group_tag }}.yaml"
-      when: policy
+#    - name: Create security rule
+#      ansible.builtin.include_tasks: includes/create-security-rule.yml
+#      when: source_address_object | length == 0
+#      vars:
+#        terraform_root: "/home/sstigter/panorama"
+#        policies_dir: "{{ terraform_root }}/policies"
+#        policy_file: "{{ policies_dir }}/{{ group_tag }}.yaml"
+#      when: policy
