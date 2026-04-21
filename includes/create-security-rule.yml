@@ -1,24 +1,27 @@
 ---
 - name: Set security policy rule name
   ansible.builtin.set_fact:
-    rule_name: "{{ source_address_object[0].split(' - ')[0] }}-{{ destination_address_object[0].split(' - ')[0] }}"
+    rule_name: "{{ source_address_object[0].split(' - ')[0] }} to {{ destination_address_object[0].split(' - ')[0] }} - {{ service_object }}"
 
 - name: Ensure policies directory exists
   ansible.builtin.file:
     path: "{{ policies_dir }}"
     state: directory
     mode: "0755"
+  delegate_to: terraform.zero-days.nl
 
 - name: Check whether policy file exists
   ansible.builtin.stat:
     path: "{{ policy_file }}"
   register: policy_file_stat
+  delegate_to: terraform.zero-days.nl
 
 - name: Read policy file if present
   ansible.builtin.slurp:
     src: "{{ policy_file }}"
   register: policy_file_raw
   when: policy_file_stat.stat.exists
+  delegate_to: terraform.zero-days.nl
 
 - name: Parse existing YAML content
   ansible.builtin.set_fact:
@@ -84,18 +87,22 @@
         | regex_replace('\n- name:', '\n\n- name:')
       }}
     mode: "0644"
+  delegate_to: terraform.zero-days.nl
 
 - name: Run terraform init
   ansible.builtin.command: terraform init
   args:
     chdir: "{{ terraform_root }}"
+  delegate_to: terraform.zero-days.nl
 
 - name: Run terraform plan
   ansible.builtin.command: terraform plan -out=tfplan
   args:
     chdir: "{{ terraform_root }}"
+  delegate_to: terraform.zero-days.nl
 
 - name: Run terraform apply
   ansible.builtin.command: terraform apply -auto-approve tfplan
   args:
     chdir: "{{ terraform_root }}"
+  delegate_to: terraform.zero-days.nl
