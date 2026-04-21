@@ -7,10 +7,10 @@
    - vault/vault-fwrules.yml
 
   vars:
-    source_address: "192.168.0.16/28"
-    destination_address: "145.2.7.1"
-    service_protocol: "tcp"
-    service_destination_port: '8082'
+    #source_address: "192.168.0.16/28"
+    #destination_address: "145.2.7.1"
+    #service_protocol: "tcp"
+    #service_destination_port: '8082'
     infoblox_host: infoblox.zero-days.nl
     infoblox_wapi_version: v2.12.3
     debug: true
@@ -53,6 +53,15 @@
       type: "internal"
 
   tasks:
+    - name: Convert input variables to internal variables
+      ansible.builtin.set_fact:
+        description: "{{ Description | lower }}"
+        source_address: "{{ Source IP adress(es) }}"
+        destination_address: "{{ Destination IP adress(es) }}"
+        service_protocol: "{{ Protocol | lower }}"
+        service_destination_port: "{{ Port(s) }}"
+        action: "{{ Action | lower }}"
+
     - name: Show source input value
       ansible.builtin.debug:
         var: source_address
