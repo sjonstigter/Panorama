@@ -70,7 +70,7 @@
         group_id: "{{ rule.group_id }}"
         destination_ci: "{{ rule.destination_ci }}"
         destination_address: "{{ rule.destination_address }}"
-        destination_dns: "{{ rule.destination_dns }}"
+        destination_name: "{{ rule.destination_name }}"
         destination_zone: "{{ rule.destination_zone }}"
         service: "{{ rule.service }}"
         service_protocol: "{{ rule.service_protocol | lower }}"
