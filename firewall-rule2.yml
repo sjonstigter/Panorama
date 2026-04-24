@@ -135,6 +135,6 @@
         destination_zone: "{{ rule.destination_zone }}"
         service: "{{ rule.service }}"
         service_protocol: "{{ rule.service_protocol | lower }}"
-        service_destination_port: "{{ rule.service_destination_port | string }}"
+        service_destination_port: "{{ rule.service_destination_ports }}"
         action: "{{ rule.action | lower }}"
         persistent: "{{ rule.persistent }}"
