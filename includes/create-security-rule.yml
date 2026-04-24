@@ -1,7 +1,7 @@
 ---
 - name: Set security policy rule name
   ansible.builtin.set_fact:
-    rule_name: "{{ source_address_object[0].split(' - ')[0] }} to {{ destination_address_object[0].split(' - ')[0] }}"
+    rule_name: "{{ source_address_object[0].split(' - ')[0] }} to {{ destination_address_object[0].split(' - ')[0] }} for {{ service_protocol | lower }}/{{ service_destination_port }}"
 
 - name: Ensure policies directory exists
   ansible.builtin.file:
