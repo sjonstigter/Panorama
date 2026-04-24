@@ -105,6 +105,8 @@
       ['ss-external', 'ss-azure']
       {%- elif pair == ['azure', 'azure'] -%}
       ['ss-azure']
+      {%- elif pair == ['external', 'azure'] -%}
+      ['ss-azure']
       {%- else -%}
       ['ERR-DG-NOT-FOUND-OR-INVALID']
       {%- endif -%}
