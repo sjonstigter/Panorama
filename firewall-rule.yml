@@ -65,7 +65,7 @@
         description: "{{ rule.description }}"
         source_ci: "{{ rule.source_ci }}"
         source_address: "{{ rule.source_address }}"
-        source_dns: "{{ rule.source_dns }}"
+        source_name: "{{ rule.source_name }}"
         source_zone: "{{ rule.source_zone }}"
         group_id: "{{ rule.group_id }}"
         destination_ci: "{{ rule.destination_ci }}"
