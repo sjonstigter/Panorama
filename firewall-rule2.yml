@@ -103,7 +103,7 @@
         combined_firewall_rules: "{{ combined_firewall_rules | default([]) + [normalized_rule] }}"
       loop: "{{ combined_rules.values() | list }}"
       vars:
-        normalized_rules: >-
+        normalized_rule: >-
           {{
             item | combine({
               'service_destination_ports':
