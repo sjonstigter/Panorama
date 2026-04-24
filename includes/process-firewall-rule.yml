@@ -1,0 +1,194 @@
+---
+- name: Show source input value
+  ansible.builtin.debug:
+    var: source_address
+  when: debug
+
+- name: Show destination input value
+  ansible.builtin.debug:
+    var: destination_address
+  when: debug
+
+- name: Determine if source and destination IPs are host or network
+  ansible.builtin.set_fact:
+    source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
+    source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
+    destination_is_host: "{{ '/' not in destination_address or destination_address.endswith('/32') }}"
+    destination_is_network: "{{ '/' in destination_address and not destination_address.endswith('/32') }}"
+
+- name: Find network for host source IP
+  ansible.builtin.uri:
+    url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ source_address | regex_replace('/32', '') }}&_return_fields=network"
+    method: GET
+    user: "{{ infoblox_username }}"
+    password: "{{ infoblox_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    return_content: true
+  register: ib_network_lookup_src
+  when: source_is_host
+
+- name: Show source value
+  ansible.builtin.debug:
+    var: ib_network_lookup_src.json[0].network
+  when: debug
+
+- name: Set source_address to Infoblox result if exists
+  ansible.builtin.set_fact:
+    source_address: >-
+      {{
+        ib_network_lookup_src.json[0].network
+        if ((ib_network_lookup_src.json | default([]) | length) > 0)
+        else source_address
+      }}
+
+- name: Set source_zones [1/2] - Set default source_zones to external - If network is not in subnet_classes assume it is external
+  ansible.builtin.set_fact:
+    source_zones: "sddc-external"
+    network_source_type: "external"
+
+- name: Set source_zones [2/2] - Match source_zones from subnet list and overwrite standard source_zones and type
+  ansible.builtin.set_fact:
+    source_zones: "{{ item.zone }}"
+    network_source_type: "{{ item.type }}"
+  loop: "{{ subnet_classes }}"
+  when: item.cidr | ansible.utils.network_in_network(source_address)
+
+- name: Find network for host destination IP
+  ansible.builtin.uri:
+    url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ destination_address | regex_replace('/32', '')  }}&_return_fields=network"
+    method: GET
+    user: "{{ infoblox_username }}"
+    password: "{{ infoblox_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    return_content: true
+  register: ib_network_lookup_dst
+  when: destination_is_host
+
+- name: Show destination value
+  ansible.builtin.debug:
+    var: ib_network_lookup_dst.json[0].network
+  when: debug
+
+- name: Set destination_address to Infoblox result if exists
+  ansible.builtin.set_fact:
+    destination_address: >-
+      {{
+        ib_network_lookup_dst.json[0].network
+        if ((ib_network_lookup_dst.json | default([]) | length) > 0)
+        else destination_address
+      }}
+
+- name: Set destination_zones [1/2] - Set default destination_zones to external - If network is not in subnet_classes assume it is external
+  ansible.builtin.set_fact:
+    destination_zones: "sddc-external"
+    network_destination_type: "external"
+
+- name: Set destination_zones [2/2] - Match destination_zones from subnet list and overwrite standard destination_zones and type
+  ansible.builtin.set_fact:
+    destination_zones: "{{ item.zone }}"
+    network_destination_type: "{{ item.type }}"
+  loop: "{{ subnet_classes }}"
+  when: item.cidr | ansible.utils.network_in_network(destination_address)
+
+- name: Determine device_group based on network type from subnet_classes
+  # Note sg_name vs ss-name (underscore) when setting final device_group names
+  ansible.builtin.set_fact:
+    device_group: >-
+      {%- set pair = [network_source_type, network_destination_type] | sort -%}
+      {%- if pair == ['external', 'internal'] -%}
+      ['ss-external']
+      {%- elif pair == ['internal', 'internal'] -%}
+      ['ss-internal']
+      {%- elif pair == ['azure', 'internal'] -%}
+      ['ss-external', 'ss-azure']
+      {%- elif pair == ['azure', 'azure'] -%}
+      ['ss-azure']
+      {%- else -%}
+      ['ERR-DG-NOT-FOUND-OR-INVALID']
+      {%- endif -%}
+
+- name: Get address objects from Panorama
+  paloaltonetworks.panos.panos_address_object:
+    provider: "{{ provider }}"
+    state: 'gathered'
+    gathered_filter: '*'
+  register: gathered_address_objects
+
+- name: Find firewall source object based on input variable [1/2] - Search for address object
+  ansible.builtin.set_fact:
+    source_address_object: >-
+      {{ gathered_address_objects.gathered
+        | selectattr('value', 'search', source_address)
+        | map(attribute='name')
+        | list }}
+
+- name: Find firewall source object based on input variable [2/2] - Create address object if none was found
+  ansible.builtin.include_tasks: includes/create-address-object.yml
+  when: source_address_object | length == 0
+  vars:
+    terraform_root: "/home/sstigter/panorama"
+    address_objects_file: "{{ terraform_root }}/address_objects.yaml"
+
+- name: Find firewall destination object based on input variable [1/2] - Search for address object
+  ansible.builtin.set_fact:
+    destination_address_object: >-
+      {{ gathered_address_objects.gathered
+        | selectattr('value', 'search', destination_address)
+        | map(attribute='name')
+        | list }}
+
+- name: Find firewall destination object based on input variable [2/2] - Create address object if none was found
+  ansible.builtin.include_tasks: includes/create-address-object.yml
+  when: destination_address_object | length == 0
+  vars:
+    terraform_root: "/home/sstigter/panorama"
+    address_objects_file: "{{ terraform_root }}/address_objects.yaml"
+
+- name: Show source address object
+  ansible.builtin.debug:
+    var: source_address_object
+  when: debug
+
+- name: Show destination address object
+  ansible.builtin.debug:
+    var: destination_address_object
+  when: debug
+
+- name: Get service objects from Panorama
+  paloaltonetworks.panos.panos_service_object:
+    provider: "{{ provider }}"
+    state: 'gathered'
+    gathered_filter: '*'
+  register: gathered_service_objects
+
+- name: Find matching service object names
+  ansible.builtin.set_fact:
+    service_object: >-
+      {{
+        gathered_service_objects.gathered
+        | selectattr('protocol', 'equalto', service_protocol)
+        | selectattr('destination_port', 'equalto', service_destination_port | string)
+        | map(attribute='name')
+        | list
+      }}
+
+- name: Show service object
+  ansible.builtin.debug:
+    var: service_object
+  when: debug
+
+- name: Include create service tasks on terraform host
+  ansible.builtin.include_tasks: includes/create-service-object.yml
+  when: service_object | length == 0
+  vars:
+    terraform_root: "/home/sstigter/panorama"
+    services_file: "{{ terraform_root }}/services.yaml"
+
+- name: Create security rule
+  ansible.builtin.include_tasks: includes/create-security-rule.yml
+  vars:
+    terraform_root: "/home/sstigter/panorama"
+    policies_dir: "{{ terraform_root }}/policies"
+    policy_file: "{{ policies_dir }}/{{ group_tag }}.yaml"
