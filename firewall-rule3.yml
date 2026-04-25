@@ -1,0 +1,148 @@
+---
+- name: ansible-vault test playbook
+  hosts: "panorama"
+  connection: local
+  gather_facts: false
+  vars_files:
+   - vault/vault-fwrules.yml
+
+  vars:
+    #source_address: "192.168.0.16/28"
+    #destination_address: "145.2.7.1"
+    #service_protocol: "tcp"
+    #service_destination_port: '8082'
+    group_tag: "myapp2"
+    infoblox_host: infoblox.zero-days.nl
+    infoblox_wapi_version: v2.12.3
+    debug: true
+    policy: false
+    provider:
+      ip_address: "{{ inventory_hostname }}"
+      username: "{{ panorama_username }}"
+      password: "{{ panorama_password }}"
+
+    subnet_classes:
+    - cidr: "10.0.0.0/8"
+      zone: "sddc-external"
+      type: "external"
+    - cidr: "172.16.0.0/12"
+      zone: "sddc-external"
+      type: "external"
+    - cidr: "10.220.0.0/16"
+      zone: "sddc-external"
+      type: "internal"
+    - cidr: "10.221.0.0/16"
+      zone: "sddc-internal"
+      type: "internal"
+    - cidr: "10.229.0.0/16"
+      zone: "sddc-internal"
+      type: "internal"
+    - cidr: "10.205.0.0/16"
+      zone: "private"
+      type: "azure"
+    - cidr: "10.226.0.0/16"
+      zone: "private"
+      type: "azure"
+    - cidr: "10.227.0.0/16"
+      zone: "private"
+      type: "azure"
+    - cidr: "10.53.80.0/20"
+      zone: "sddc-oob"
+      type: "external"
+    - cidr: "192.168.0.0/16"
+      zone: "sddc-internal"
+      type: "internal"
+
+  tasks:
+    - name: Resolve host IPs to Infoblox networks
+      ansible.builtin.include_tasks: includes/resolve-firewall-row.yml
+      loop: "{{ firewall_rules }}"
+      loop_control:
+        loop_var: rule
+        label: "row {{ rule.row }}"
+
+    - name: Build combined firewall rules
+      ansible.builtin.set_fact:
+        combined_rules: >-
+          {{
+            current_combined_rules |
+            combine({
+              rule_key: {
+                'source_address': item.source_address,
+                'destination_address': item.destination_address,
+                'source_zone': item.source_zone,
+                'destination_zone': item.destination_zone,
+                'service_protocol': item.service_protocol | lower,
+                'action': item.action | lower,
+                'service_destination_ports':
+                  (
+                    current_combined_rules[rule_key].service_destination_ports
+                    | default([])
+                    if rule_key in current_combined_rules else []
+                  )
+                  + [item.service_destination_port | string],
+                'rows':
+                  (
+                    current_combined_rules[rule_key].rows
+                    | default([])
+                    if rule_key in current_combined_rules else []
+                  )
+                  + [item.row]
+              }
+            }, recursive=true)
+          }}
+      loop: "{{ firewall_rules_resolved }}"
+      vars:
+        current_combined_rules: "{{ combined_rules | default({}) }}"
+        rule_key: >-
+          {{
+            [
+              item.source_address,
+              item.destination_address,
+              item.source_zone,
+              item.destination_zone,
+              item.service_protocol | lower,
+              item.action | lower
+            ] | join('|')
+          }}
+
+    - name: Normalize combined firewall rules
+      ansible.builtin.set_fact:
+        combined_firewall_rules: "{{ combined_firewall_rules | default([]) + [normalized_rule] }}"
+      loop: "{{ combined_rules.values() | list }}"
+      vars:
+        normalized_rule: >-
+          {{
+            item | combine({
+              'service_destination_ports':
+                item.service_destination_ports | unique | sort
+            })
+          }}
+
+    - name: Show combined rules
+      ansible.builtin.debug:
+        var: combined_firewall_rules
+
+#    - name: Process firewall rules from JSON input
+#      ansible.builtin.include_tasks: includes/process-firewall-rule.yml
+#      loop: "{{ combined_firewall_rules }}"
+#      loop_control:
+#        loop_var: rule
+#        label: "row {{ rule.row }} - {{ rule.description }}"
+#      vars:
+#        row: "{{ rule.row }}"
+#        description: "{{ rule.description }}"
+#        source_ci: "{{ rule.source_ci }}"
+#        source_address: "{{ rule.source_address }}"
+#        source_name: "{{ rule.source_name }}"
+#        source_zone: "{{ rule.source_zone }}"
+#        group_id: "{{ rule.group_id }}"
+#        destination_ci: "{{ rule.destination_ci }}"
+#        destination_address: "{{ rule.destination_address }}"
+#        destination_name: "{{ rule.destination_name }}"
+#        destination_zone: "{{ rule.destination_zone }}"
+#        service: "{{ rule.service }}"
+#        service_protocol: "{{ rule.service_protocol | lower }}"
+#        service_destination_port: "{{ rule.service_destination_ports }}"
+#        action: "{{ rule.action | lower }}"
+#s        persistent: "{{ rule.persistent }}"

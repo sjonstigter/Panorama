@@ -1,0 +1,75 @@
+---
+- name: Determine if source and destination IPs are host or network
+  ansible.builtin.set_fact:
+    source_is_host: "{{ '/' not in rule.source_address or rule.source_address.endswith('/32') }}"
+    source_is_network: "{{ '/' in rule.source_address and not rule.source_address.endswith('/32') }}"
+    destination_is_host: "{{ '/' not in rule.destination_address or rule.destination_address.endswith('/32') }}"
+    destination_is_network: "{{ '/' in rule.destination_address and not rule.destination_address.endswith('/32') }}"
+
+- name: Find network for host source IP
+  ansible.builtin.uri:
+    url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ rule.source_address | regex_replace('/32$', '') }}&_return_fields=network"
+    method: GET
+    user: "{{ infoblox_username }}"
+    password: "{{ infoblox_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    return_content: true
+  register: ib_network_lookup_src
+  when: source_is_host | bool
+
+- name: Find network for host destination IP
+  ansible.builtin.uri:
+    url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ rule.destination_address | regex_replace('/32$', '') }}&_return_fields=network"
+    method: GET
+    user: "{{ infoblox_username }}"
+    password: "{{ infoblox_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    return_content: true
+  register: ib_network_lookup_dst
+  when: destination_is_host | bool
+
+- name: Add resolved row to firewall_rules_resolved
+  ansible.builtin.set_fact:
+    firewall_rules_resolved: >-
+      {{
+        firewall_rules_resolved | default([]) +
+        [
+          rule | combine({
+            'source_address': resolved_source_address,
+            'destination_address': resolved_destination_address
+          })
+        ]
+      }}
+  vars:
+    resolved_source_address: >-
+      {{
+        (
+          ib_network_lookup_src.json[0].network
+          if
+            source_is_host | bool
+            and ib_network_lookup_src is defined
+            and not ib_network_lookup_src.skipped | default(false)
+            and ib_network_lookup_src.json | default([]) | length > 0
+          else
+            rule.source_address
+        )
+      }}
+    resolved_destination_address: >-
+      {{
+        (
+          ib_network_lookup_dst.json[0].network
+          if
+            destination_is_host | bool
+            and ib_network_lookup_dst is defined
+            and not ib_network_lookup_dst.skipped | default(false)
+            and ib_network_lookup_dst.json | default([]) | length > 0
+          else
+            rule.destination_address
+        )
+      }}
+
+- name: Show resolved rules
+  ansible.builtin.debug:
+    var: firewall_rules_resolved
