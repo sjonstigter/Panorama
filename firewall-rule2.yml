@@ -58,27 +58,27 @@
       ansible.builtin.set_fact:
         combined_rules: >-
           {{
-            combined_rules | default({}) |
+            current_combined_rules |
             combine({
               rule_key: {
                 'source_address': item.source_address,
                 'destination_address': item.destination_address,
-                'source_zone': item.source_zone | default('any'),
-                'destination_zone': item.destination_zone | default('any'),
+                'source_zone': item.source_zone | default('any', true),
+                'destination_zone': item.destination_zone | default('any', true),
                 'service_protocol': item.service_protocol | lower,
                 'action': item.action | lower,
                 'service_destination_ports':
                   (
-                    combined_rules[rule_key].service_destination_ports
+                    current_combined_rules[rule_key].service_destination_ports
                     | default([])
-                    if rule_key in combined_rules else []
+                    if rule_key in current_combined_rules else []
                   )
                   + [item.service_destination_port | string],
                 'rows':
                   (
-                    combined_rules[rule_key].rows
+                    current_combined_rules[rule_key].rows
                     | default([])
-                    if rule_key in combined_rules else []
+                    if rule_key in current_combined_rules else []
                   )
                   + [item.row]
               }
@@ -86,13 +86,14 @@
           }}
       loop: "{{ firewall_rules }}"
       vars:
+        current_combined_rules: "{{ combined_rules | default({}) }}"
         rule_key: >-
           {{
             [
               item.source_address,
               item.destination_address,
-              item.source_zone | default('any'),
-              item.destination_zone | default('any'),
+              item.source_zone | default('any', true),
+              item.destination_zone | default('any', true),
               item.service_protocol | lower,
               item.action | lower
             ] | join('|')
