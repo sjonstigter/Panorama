@@ -70,43 +70,6 @@
         )
       }}
 
-- name: Set source_zones default
-  ansible.builtin.set_fact:
-    source_zones: "sddc-external"
-    network_source_type: "external"
-
-- name: Match source_zones from subnet list
-  ansible.builtin.set_fact:
-    source_zones: "{{ item.zone }}"
-    network_source_type: "{{ item.type }}"
-  loop: "{{ subnet_classes }}"
-  when: item.cidr | ansible.utils.network_in_network(rule.source_address)
-
-- name: Set destination_zones default
-  ansible.builtin.set_fact:
-    destination_zones: "sddc-external"
-    network_destination_type: "external"
-
-- name: Match destination_zones from subnet list
-  ansible.builtin.set_fact:
-    destination_zones: "{{ item.zone }}"
-    network_destination_type: "{{ item.type }}"
-  loop: "{{ subnet_classes }}"
-  when: item.cidr | ansible.utils.network_in_network(rule.destination_address)
-
-- name: Add resolved row to firewall_rules_resolved
-  ansible.builtin.set_fact:
-    firewall_rules_resolved: >-
-      {{
-        firewall_rules_resolved | default([]) +
-        [
-          rule | combine({
-            'source_zones': source_zones,
-            'destination_zones': destination_zones
-          })
-        ]
-      }}
-
 - name: Show resolved rules
   ansible.builtin.debug:
     var: firewall_rules_resolved
