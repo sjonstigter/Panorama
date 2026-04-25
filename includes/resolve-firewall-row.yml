@@ -101,12 +101,8 @@
         firewall_rules_resolved | default([]) +
         [
           rule | combine({
-            'source_address': resolved_source_address,
-            'destination_address': resolved_destination_address,
             'source_zones': source_zones,
-            'destination_zones': destination_zones,
-            'network_source_type': network_source_type,
-            'network_destination_type': network_destination_type
+            'destination_zones': destination_zones
           })
         ]
       }}
