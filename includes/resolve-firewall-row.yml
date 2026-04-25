@@ -80,7 +80,7 @@
     source_zones: "{{ item.zone }}"
     network_source_type: "{{ item.type }}"
   loop: "{{ subnet_classes }}"
-  when: item.cidr | ansible.utils.network_in_network(source_address)
+  when: item.cidr | ansible.utils.network_in_network(rule.source_address)
 
 - name: Set destination_zones default
   ansible.builtin.set_fact:
@@ -92,7 +92,7 @@
     destination_zones: "{{ item.zone }}"
     network_destination_type: "{{ item.type }}"
   loop: "{{ subnet_classes }}"
-  when: item.cidr | ansible.utils.network_in_network(destination_address)
+  when: item.cidr | ansible.utils.network_in_network(rule.destination_address)
 
 - name: Add resolved row to firewall_rules_resolved
   ansible.builtin.set_fact:
