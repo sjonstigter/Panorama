@@ -144,7 +144,7 @@
         loop_var: rule
         label: "row {{ rule.row }} - {{ rule.description }}"
       vars:
-        row: "{{ rule.row }}"
+        row: "{{ rule.rows }}"
         description: "{{ rule.description }}"
         source_ci: "{{ rule.source_ci }}"
         source_address: "{{ rule.source_address }}"
