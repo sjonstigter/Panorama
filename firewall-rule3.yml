@@ -70,6 +70,7 @@
               rule_key: {
                 'source_address': item.source_address,
                 'destination_address': item.destination_address,
+                'destination_name': item.destination_name,
                 'source_zone': item.source_zone,
                 'destination_zone': item.destination_zone,
                 'service_protocol': item.service_protocol | lower,
@@ -99,6 +100,7 @@
             [
               item.source_address,
               item.destination_address,
+              item.destination_name,
               item.source_zone,
               item.destination_zone,
               item.service_protocol | lower,
