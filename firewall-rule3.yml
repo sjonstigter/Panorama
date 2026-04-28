@@ -68,6 +68,7 @@
             current_combined_rules |
             combine({
               rule_key: {
+                'description': item.description,
                 'source_address': item.source_address,
                 'destination_address': item.destination_address,
                 'destination_name': item.destination_name,
@@ -98,7 +99,9 @@
         rule_key: >-
           {{
             [
+              item.description,
               item.source_address,
+              item.source_name,
               item.destination_address,
               item.destination_name,
               item.source_zone,
