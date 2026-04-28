@@ -9,38 +9,38 @@
     var: destination_address
   when: debug
 
-- name: Determine if source and destination IPs are host or network
-  ansible.builtin.set_fact:
-    source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
-    source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
-    destination_is_host: "{{ '/' not in destination_address or destination_address.endswith('/32') }}"
-    destination_is_network: "{{ '/' in destination_address and not destination_address.endswith('/32') }}"
+#- name: Determine if source and destination IPs are host or network
+#  ansible.builtin.set_fact:
+#    source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
+#    source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
+#    destination_is_host: "{{ '/' not in destination_address or destination_address.endswith('/32') }}"
+#    destination_is_network: "{{ '/' in destination_address and not destination_address.endswith('/32') }}"
 
-- name: Find network for host source IP
-  ansible.builtin.uri:
-    url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ source_address | regex_replace('/32', '') }}&_return_fields=network"
-    method: GET
-    user: "{{ infoblox_username }}"
-    password: "{{ infoblox_password }}"
-    force_basic_auth: true
-    validate_certs: false
-    return_content: true
-  register: ib_network_lookup_src
-  when: source_is_host
+#- name: Find network for host source IP
+#  ansible.builtin.uri:
+#    url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ source_address | regex_replace('/32', '') }}&_return_fields=network"
+#    method: GET
+#    user: "{{ infoblox_username }}"
+#    password: "{{ infoblox_password }}"
+#    force_basic_auth: true
+#    validate_certs: false
+#    return_content: true
+#  register: ib_network_lookup_src
+#  when: source_is_host
 
-- name: Show source value
-  ansible.builtin.debug:
-    var: ib_network_lookup_src.json[0].network
-  when: debug
+#- name: Show source value
+#  ansible.builtin.debug:
+#    var: ib_network_lookup_src.json[0].network
+#  when: debug
 
-- name: Set source_address to Infoblox result if exists
-  ansible.builtin.set_fact:
-    source_address: >-
-      {{
-        ib_network_lookup_src.json[0].network
-        if ((ib_network_lookup_src.json | default([]) | length) > 0)
-        else source_address
-      }}
+#- name: Set source_address to Infoblox result if exists
+#  ansible.builtin.set_fact:
+#    source_address: >-
+#      {{
+#        ib_network_lookup_src.json[0].network
+#        if ((ib_network_lookup_src.json | default([]) | length) > 0)
+#        else source_address
+#      }}
 
 - name: Set source_zones [1/2] - Set default source_zones to external - If network is not in subnet_classes assume it is external
   ansible.builtin.set_fact:
@@ -54,31 +54,31 @@
   loop: "{{ subnet_classes }}"
   when: item.cidr | ansible.utils.network_in_network(source_address)
 
-- name: Find network for host destination IP
-  ansible.builtin.uri:
-    url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ destination_address | regex_replace('/32', '')  }}&_return_fields=network"
-    method: GET
-    user: "{{ infoblox_username }}"
-    password: "{{ infoblox_password }}"
-    force_basic_auth: true
-    validate_certs: false
-    return_content: true
-  register: ib_network_lookup_dst
-  when: destination_is_host
+#- name: Find network for host destination IP
+#  ansible.builtin.uri:
+#    url: "https://{{ infoblox_host }}/wapi/{{ infoblox_wapi_version }}/network?network_view=default&contains_address={{ destination_address | regex_replace('/32', '')  }}&_return_fields=network"
+#    method: GET
+#    user: "{{ infoblox_username }}"
+#    password: "{{ infoblox_password }}"
+#    force_basic_auth: true
+#    validate_certs: false
+#    return_content: true
+#  register: ib_network_lookup_dst
+#  when: destination_is_host
 
-- name: Show destination value
-  ansible.builtin.debug:
-    var: ib_network_lookup_dst.json[0].network
-  when: debug
+#- name: Show destination value
+#  ansible.builtin.debug:
+#    var: ib_network_lookup_dst.json[0].network
+#  when: debug
 
-- name: Set destination_address to Infoblox result if exists
-  ansible.builtin.set_fact:
-    destination_address: >-
-      {{
-        ib_network_lookup_dst.json[0].network
-        if ((ib_network_lookup_dst.json | default([]) | length) > 0)
-        else destination_address
-      }}
+#- name: Set destination_address to Infoblox result if exists
+#  ansible.builtin.set_fact:
+#    destination_address: >-
+#      {{
+#        ib_network_lookup_dst.json[0].network
+#        if ((ib_network_lookup_dst.json | default([]) | length) > 0)
+#        else destination_address
+#      }}
 
 - name: Set destination_zones [1/2] - Set default destination_zones to external - If network is not in subnet_classes assume it is external
   ansible.builtin.set_fact:
