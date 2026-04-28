@@ -75,7 +75,7 @@
                 'destination_name': item.destination_name,
                 'source_zone': item.source_zone,
                 'destination_zone': item.destination_zone,
-                'application': item.application
+                'application': item.application,
                 'service_protocol': item.service_protocol | lower,
                 'action': item.action | lower,
                 'service_destination_ports':
