@@ -209,13 +209,7 @@
 
 - name: NEW Build final service_object list
   ansible.builtin.set_fact:
-    service_object: >-
-      {{
-        service_destination_port
-        | map('string')
-        | map('regex_replace', '^(.*)$', service_protocol ~ '-\\1')
-        | list
-      }}
+    service_object: "{{ service_destination_port | map('string') | map('regex_replace', '^', service_protocol ~ '-') | list }}"
 
 - name: Show service object
   ansible.builtin.debug:
