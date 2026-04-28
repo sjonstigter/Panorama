@@ -70,10 +70,12 @@
               rule_key: {
                 'description': item.description,
                 'source_address': item.source_address,
+                'source_name': item.source_name,
                 'destination_address': item.destination_address,
                 'destination_name': item.destination_name,
                 'source_zone': item.source_zone,
                 'destination_zone': item.destination_zone,
+                'application': item.application
                 'service_protocol': item.service_protocol | lower,
                 'action': item.action | lower,
                 'service_destination_ports':
@@ -106,6 +108,7 @@
               item.destination_name,
               item.source_zone,
               item.destination_zone,
+              item.application,
               item.service_protocol | lower,
               item.action | lower
             ] | join('|')
