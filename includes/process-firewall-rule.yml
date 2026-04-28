@@ -211,7 +211,7 @@
   ansible.builtin.set_fact:
     service_object: >-
       {{
-        service_ports
+        service_destination_port
         | map('string')
         | map('regex_replace', '^(.*)$', service_protocol ~ '-\\1')
         | list
