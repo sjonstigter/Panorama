@@ -165,22 +165,11 @@
     gathered_filter: '*'
   register: gathered_service_objects
 
-#- name: Find matching service object names
-#  ansible.builtin.set_fact:
-#    service_object: >-
-#      {{
-#        gathered_service_objects.gathered
-#        | selectattr('protocol', 'equalto', service_protocol)
-#        | selectattr('destination_port', 'equalto', service_destination_port | string)
-#        | map(attribute='name')
-#        | list
-#      }}
-
 - name: Show service destination ports
   ansible.builtin.debug:
     var: service_destination_port
 
-- name: NEW Determine existing ports
+- name: NEW Determine existing ports - get list of all ports per protocol
   ansible.builtin.set_fact:
     existing_ports: >-
       {{
@@ -190,14 +179,14 @@
         | list
       }}
 
-- name: NEW Determine missing ports
+- name: NEW Determine missing ports - compare service_destination_port to existing_ports
   ansible.builtin.set_fact:
     missing_ports: >-
       {{
         service_destination_port | map('string') | difference(existing_ports)
       }}
 
-- name: NEW Create missing service objects
+- name: NEW Create missing service objects - loop through missing_ports we might have
   ansible.builtin.include_tasks: includes/create-service-object.yml
   loop: "{{ missing_ports }}"
   loop_control:
@@ -207,21 +196,9 @@
     services_file: "{{ terraform_root }}/services.yaml"
     service_destination_port: "{{ port }}"
 
-- name: NEW Build final service_object list
+- name: NEW Build final service_object list -EXPL
   ansible.builtin.set_fact:
     service_object: "{{ service_destination_port | map('string') | map('regex_replace', '^', service_protocol ~ '-') | list }}"
-
-- name: Show service object
-  ansible.builtin.debug:
-    var: service_object
-  when: debug
-
-#- name: Include create service tasks on terraform host
-#  ansible.builtin.include_tasks: includes/create-service-object.yml
-#  when: service_object | length == 0
-#  vars:
-#    terraform_root: "/home/sstigter/panorama"
-#    services_file: "{{ terraform_root }}/services.yaml"
 
 - name: Create security rule
   ansible.builtin.include_tasks: includes/create-security-rule.yml
