@@ -142,7 +142,7 @@
       loop: "{{ combined_firewall_rules }}"
       loop_control:
         loop_var: rule
-        label: "row {{ rule.row }} - {{ rule.description }}"
+        label: "row {{ rule.rows }} - {{ rule.description }}"
       vars:
         row: "{{ rule.rows }}"
         description: "{{ rule.description }}"
