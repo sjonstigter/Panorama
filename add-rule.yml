@@ -71,4 +71,5 @@
         service: "{{ rule.service }}"
         service_protocol: "{{ rule.service_protocol | lower }}"
         service_destination_port: "{{ rule.service_destination_ports }}"
+        device_group: "{{ rule.device_group }}"
         action: "{{ rule.action | lower }}"
