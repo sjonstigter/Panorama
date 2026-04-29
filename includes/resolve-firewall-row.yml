@@ -32,7 +32,7 @@
 
 - name: Set source_zones - Match source_zones from subnet list and overwrite standard source_zones and type
   ansible.builtin.set_fact:
-    source_zones: "{{ item.zone }}"
+    source_zone: "{{ item.zone }}"
     network_source_type: "{{ item.type }}"
   loop: "{{ subnet_classes }}"
   when: item.cidr | ansible.utils.network_in_network(rule.source_address)
@@ -46,7 +46,7 @@
           rule | combine({
             'source_address': resolved_source_address,
             'destination_address': resolved_destination_address,
-            'source_zones': resolved_source_zones
+            'source_zone': resolved_source_zone
           })
         ]
       }}
@@ -77,13 +77,13 @@
             rule.destination_address
         )
       }}
-    resolved_source_zones: >-
+    resolved_source_zone: >-
       {{
         (
-          source_zones
+          source_zone
           if
-            source_zones is defined
-            and source_zones | default([]) | length > 0
+            source_zone is defined
+            and source_zone | default([]) | length > 0
           else
             'sg_external'
         )
