@@ -42,17 +42,17 @@
 #        else source_address
 #      }}
 
-- name: Set source_zones [1/2] - Set default source_zones to external - If network is not in subnet_classes assume it is external
-  ansible.builtin.set_fact:
-    source_zones: "sddc-external"
-    network_source_type: "external"
+#- name: Set source_zones [1/2] - Set default source_zones to external - If network is not in subnet_classes assume it is external
+#  ansible.builtin.set_fact:
+#    source_zones: "sddc-external"
+#    network_source_type: "external"
 
-- name: Set source_zones [2/2] - Match source_zones from subnet list and overwrite standard source_zones and type
-  ansible.builtin.set_fact:
-    source_zones: "{{ item.zone }}"
-    network_source_type: "{{ item.type }}"
-  loop: "{{ subnet_classes }}"
-  when: item.cidr | ansible.utils.network_in_network(source_address)
+#- name: Set source_zones [2/2] - Match source_zones from subnet list and overwrite standard source_zones and type
+#  ansible.builtin.set_fact:
+#    source_zones: "{{ item.zone }}"
+#    network_source_type: "{{ item.type }}"
+#  loop: "{{ subnet_classes }}"
+#  when: item.cidr | ansible.utils.network_in_network(source_address)
 
 #- name: Find network for host destination IP
 #  ansible.builtin.uri:
@@ -80,17 +80,17 @@
 #        else destination_address
 #      }}
 
-- name: Set destination_zones [1/2] - Set default destination_zones to external - If network is not in subnet_classes assume it is external
-  ansible.builtin.set_fact:
-    destination_zones: "sddc-external"
-    network_destination_type: "external"
+#- name: Set destination_zones [1/2] - Set default destination_zones to external - If network is not in subnet_classes assume it is external
+#  ansible.builtin.set_fact:
+#    destination_zones: "sddc-external"
+#    network_destination_type: "external"
 
-- name: Set destination_zones [2/2] - Match destination_zones from subnet list and overwrite standard destination_zones and type
-  ansible.builtin.set_fact:
-    destination_zones: "{{ item.zone }}"
-    network_destination_type: "{{ item.type }}"
-  loop: "{{ subnet_classes }}"
-  when: item.cidr | ansible.utils.network_in_network(destination_address)
+#- name: Set destination_zones [2/2] - Match destination_zones from subnet list and overwrite standard destination_zones and type
+#  ansible.builtin.set_fact:
+#    destination_zones: "{{ item.zone }}"
+#    network_destination_type: "{{ item.type }}"
+#  loop: "{{ subnet_classes }}"
+#  when: item.cidr | ansible.utils.network_in_network(destination_address)
 
 - name: Determine device_group based on network type from subnet_classes
   # Note sg_name vs ss-name (underscore) when setting final device_group names

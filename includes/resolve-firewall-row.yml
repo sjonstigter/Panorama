@@ -44,6 +44,25 @@
   loop: "{{ subnet_classes }}"
   when: item.cidr | ansible.utils.network_in_network(rule.destination_address)
 
+- name: Determine device_group based on network type from subnet_classes
+  # Note sg_name vs ss-name (underscore) when setting final device_group names
+  ansible.builtin.set_fact:
+    device_group: >-
+      {%- set pair = [network_source_type, network_destination_type] | sort -%}
+      {%- if pair == ['external', 'internal'] -%}
+      ['ss-external']
+      {%- elif pair == ['internal', 'internal'] -%}
+      ['ss-internal']
+      {%- elif pair == ['azure', 'internal'] -%}
+      ['ss-external', 'ss-azure']
+      {%- elif pair == ['azure', 'azure'] -%}
+      ['ss-azure']
+      {%- elif pair == ['external', 'azure'] -%}
+      ['ss-azure']
+      {%- else -%}
+      ['ERR-DG-NOT-FOUND-OR-INVALID']
+      {%- endif -%}
+
 - name: Add resolved row to firewall_rules_resolved
   ansible.builtin.set_fact:
     firewall_rules_resolved: >-
@@ -55,6 +74,7 @@
             'destination_address': resolved_destination_address,
             'source_zone': resolved_source_zone,
             'destination_zone': resolved_destination_zone
+            'device_group': device_group
           })
         ]
       }}
