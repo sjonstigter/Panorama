@@ -1,3 +1,4 @@
+# sudo apt install python3-pandas
 import pandas as pd
 import json
 
