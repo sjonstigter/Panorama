@@ -37,6 +37,10 @@
   loop: "{{ subnet_classes }}"
   when: item.cidr | ansible.utils.network_in_network(rule.source_address)
 
+- name: Set destination_zones [1/2] - Set default destination_zones to external - If network is not in subnet_classes assume it is external
+  ansible.builtin.set_fact:
+    network_destination_type: "external"
+
 - name: Set destination_zones - Match destination_zones from subnet list and overwrite standard destination_zones and type
   ansible.builtin.set_fact:
     destination_zone: "{{ item.zone }}"
