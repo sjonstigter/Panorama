@@ -9,12 +9,12 @@
     var: destination_address
   when: debug
 
-#- name: Determine if source and destination IPs are host or network
-#  ansible.builtin.set_fact:
-#    source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
-#    source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
-#    destination_is_host: "{{ '/' not in destination_address or destination_address.endswith('/32') }}"
-#    destination_is_network: "{{ '/' in destination_address and not destination_address.endswith('/32') }}"
+- name: Determine if source and destination IPs are host or network
+  ansible.builtin.set_fact:
+    source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
+    source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
+    destination_is_host: "{{ '/' not in destination_address or destination_address.endswith('/32') }}"
+    destination_is_network: "{{ '/' in destination_address and not destination_address.endswith('/32') }}"
 
 #- name: Find network for host source IP
 #  ansible.builtin.uri:
