@@ -77,7 +77,7 @@
             'source_address': resolved_source_address,
             'destination_address': resolved_destination_address,
             'source_zone': resolved_source_zone,
-            'destination_zone': resolved_destination_zone
+            'destination_zone': resolved_destination_zone,
             'device_group': device_group
           })
         ]
