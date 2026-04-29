@@ -139,6 +139,11 @@
       ansible.builtin.debug:
         var: combined_firewall_rules
 
+    - name: Set stat combined_firewall_rules
+      ansible.builtin.set_stats:
+        data:
+          combined_firewall_rules: "{{ combined_firewall_rules }}"
+
 #    - name: Process firewall rules from JSON input
 #      ansible.builtin.include_tasks: includes/process-firewall-rule.yml
 #      loop: "{{ combined_firewall_rules }}"
