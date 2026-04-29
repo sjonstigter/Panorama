@@ -137,25 +137,25 @@
       ansible.builtin.debug:
         var: combined_firewall_rules
 
-    - name: Process firewall rules from JSON input
-      ansible.builtin.include_tasks: includes/process-firewall-rule.yml
-      loop: "{{ combined_firewall_rules }}"
-      loop_control:
-        loop_var: rule
-        label: "row {{ rule.rows }} - {{ rule.description }}"
-      vars:
-        row: "{{ rule.rows }}"
-        description: "{{ rule.description }}"
-        source_ci: "{{ rule.source_ci }}"
-        source_address: "{{ rule.source_address }}"
-        source_name: "{{ rule.source_name }}"
-        source_zone: "{{ rule.source_zone }}"
-        group_id: "{{ rule.group_id }}"
-        destination_ci: "{{ rule.destination_ci }}"
-        destination_address: "{{ rule.destination_address }}"
-        destination_name: "{{ rule.destination_name }}"
-        destination_zone: "{{ rule.destination_zone }}"
-        service: "{{ rule.service }}"
-        service_protocol: "{{ rule.service_protocol | lower }}"
-        service_destination_port: "{{ rule.service_destination_ports }}"
-        action: "{{ rule.action | lower }}"
+#    - name: Process firewall rules from JSON input
+#      ansible.builtin.include_tasks: includes/process-firewall-rule.yml
+#      loop: "{{ combined_firewall_rules }}"
+#      loop_control:
+#        loop_var: rule
+#        label: "row {{ rule.rows }} - {{ rule.description }}"
+#      vars:
+#        row: "{{ rule.rows }}"
+#        description: "{{ rule.description }}"
+#        source_ci: "{{ rule.source_ci }}"
+#        source_address: "{{ rule.source_address }}"
+#        source_name: "{{ rule.source_name }}"
+#        source_zone: "{{ rule.source_zone }}"
+#        group_id: "{{ rule.group_id }}"
+#        destination_ci: "{{ rule.destination_ci }}"
+#        destination_address: "{{ rule.destination_address }}"
+#        destination_name: "{{ rule.destination_name }}"
+#        destination_zone: "{{ rule.destination_zone }}"
+#        service: "{{ rule.service }}"
+#        service_protocol: "{{ rule.service_protocol | lower }}"
+#        service_destination_port: "{{ rule.service_destination_ports }}"
+#        action: "{{ rule.action | lower }}"
