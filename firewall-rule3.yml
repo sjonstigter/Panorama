@@ -81,6 +81,7 @@
                 'service_protocol': item.service_protocol | lower,
                 'group_id': item.group_id,
                 'action': item.action | lower,
+                'device_group': item.device_group,
                 'service_destination_ports':
                   (
                     current_combined_rules[rule_key].service_destination_ports
@@ -116,7 +117,8 @@
               item.application,
               item.service_protocol | lower,
               item.group_id,
-              item.action | lower
+              item.action | lower,
+              item.device_group
             ] | join('|')
           }}
 
