@@ -93,7 +93,7 @@
             source_zone is defined
             and source_zone | default([]) | length > 0
           else
-            'sg_external'
+            'sddc-external'
         )
       }}
     resolved_destination_zone: >-
@@ -104,7 +104,7 @@
             destination_zone is defined
             and destination_zone | default([]) | length > 0
           else
-            'sg_external'
+            'sddc-external'
         )
       }}
 
