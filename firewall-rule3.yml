@@ -77,11 +77,21 @@
                 'destination_ci': item.destination_ci,
                 'source_zone': item.source_zone,
                 'destination_zone': item.destination_zone,
-                'application': item.application,
+
+                # Keep application in the output, but do not use it for matching
+                'application':
+                  (
+                    current_combined_rules[rule_key].application
+                    | default([])
+                    if rule_key in current_combined_rules else []
+                  )
+                  + [item.application],
+
                 'service_protocol': item.service_protocol | lower,
                 'group_id': item.group_id,
                 'action': item.action | lower,
                 'device_group': item.device_group,
+
                 'service_destination_ports':
                   (
                     current_combined_rules[rule_key].service_destination_ports
@@ -89,6 +99,7 @@
                     if rule_key in current_combined_rules else []
                   )
                   + [item.service_destination_port | string],
+
                 'rows':
                   (
                     current_combined_rules[rule_key].rows
@@ -114,7 +125,6 @@
               item.destination_ci,
               item.source_zone,
               item.destination_zone,
-              item.application,
               item.service_protocol | lower,
               item.group_id,
               item.action | lower,
@@ -130,8 +140,8 @@
         normalized_rule: >-
           {{
             item | combine({
-              'service_destination_ports':
-                item.service_destination_ports | unique | sort
+              'application': item.application | unique | sort,
+              'service_destination_ports': item.service_destination_ports | unique | sort
             })
           }}
 
