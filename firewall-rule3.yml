@@ -78,7 +78,6 @@
                 'source_zone': item.source_zone,
                 'destination_zone': item.destination_zone,
 
-                # Keep application in the output, but do not use it for matching
                 'application':
                   (
                     current_combined_rules[rule_key].application
