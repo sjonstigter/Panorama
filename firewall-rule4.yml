@@ -180,7 +180,7 @@
                     | default([])
                     if rule_key in current_combined_rules_destination else []
                   )
-                  + [item.row]
+                  + [item.rows]
               }
             }, recursive=true)
           }}
