@@ -200,8 +200,6 @@
               item.source_address,
               item.source_name,
               item.source_ci,
-              item.destination_address,
-              item.destination_name,
               item.destination_ci,
               item.source_zone,
               item.destination_zone,
