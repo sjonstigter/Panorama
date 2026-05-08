@@ -144,163 +144,169 @@
             })
           }}
 
+    - name: Build destination-port rulebase
+      when: combine in ['destination-port']
+      block:
 
-    - name: Build combined firewall rules dest
-      ansible.builtin.set_fact:
-        combined_rules_destination: >-
-          {{
-            current_combined_rules_destination |
-            combine({
-              rule_key: {
-                'description': item.description,
-                'source_address': item.source_address,
-                'source_name': item.source_name,
-                'source_ci': item.source_ci,
-                'destination_address':
-                  (
-                    current_combined_rules_destination[rule_key].destination_address
-                    | default([])
-                    if rule_key in current_combined_rules_destination else []
-                  )
-                  + [item.destination_address],
-                'destination_name':
-                  (
-                    current_combined_rules_destination[rule_key].destination_name
-                    | default([])
-                    if rule_key in current_combined_rules_destination else []
-                  )
-                  + [item.destination_name],
-                'destination_ci': item.destination_ci,
-                'source_zone': item.source_zone,
-                'destination_zone': item.destination_zone,
-                'application': item.application,
-                'service_protocol': item.service_protocol | lower,
-                'group_id': item.group_id,
-                'action': item.action | lower,
-                'device_group': item.device_group,
-                'service_destination_ports': item.service_destination_ports,
+        - name: Build combined firewall rules dest
+          ansible.builtin.set_fact:
+            combined_rules_destination: >-
+              {{
+                current_combined_rules_destination |
+                combine({
+                  rule_key: {
+                    'description': item.description,
+                    'source_address': item.source_address,
+                    'source_name': item.source_name,
+                    'source_ci': item.source_ci,
+                    'destination_address':
+                      (
+                        current_combined_rules_destination[rule_key].destination_address
+                        | default([])
+                        if rule_key in current_combined_rules_destination else []
+                      )
+                      + [item.destination_address],
+                    'destination_name':
+                      (
+                        current_combined_rules_destination[rule_key].destination_name
+                        | default([])
+                        if rule_key in current_combined_rules_destination else []
+                      )
+                      + [item.destination_name],
+                    'destination_ci': item.destination_ci,
+                    'source_zone': item.source_zone,
+                    'destination_zone': item.destination_zone,
+                    'application': item.application,
+                    'service_protocol': item.service_protocol | lower,
+                    'group_id': item.group_id,
+                    'action': item.action | lower,
+                    'device_group': item.device_group,
+                    'service_destination_ports': item.service_destination_ports,
 
-                'rows':
-                  (
-                    current_combined_rules_destination[rule_key].rows
-                    | default([])
-                    if rule_key in current_combined_rules_destination else []
-                  )
-                  + [item.rows]
-              }
-            }, recursive=true)
-          }}
-      loop: "{{ combined_firewall_rules }}"
-      vars:
-        current_combined_rules_destination: "{{ combined_rules_destination | default({}) }}"
-        rule_key: >-
-          {{
-            [
-              item.description,
-              item.source_address,
-              item.source_name,
-              item.source_ci,
-              item.destination_ci,
-              item.source_zone,
-              item.destination_zone,
-              item.service_protocol | lower,
-              item.group_id,
-              item.action | lower,
-              item.device_group
-            ] | join('|')
-          }}
+                    'rows':
+                      (
+                        current_combined_rules_destination[rule_key].rows
+                        | default([])
+                        if rule_key in current_combined_rules_destination else []
+                      )
+                      + [item.rows]
+                  }
+                }, recursive=true)
+              }}
+          loop: "{{ combined_firewall_rules }}"
+          vars:
+            current_combined_rules_destination: "{{ combined_rules_destination | default({}) }}"
+            rule_key: >-
+              {{
+                [
+                  item.description,
+                  item.source_address,
+                  item.source_name,
+                  item.source_ci,
+                  item.destination_ci,
+                  item.source_zone,
+                  item.destination_zone,
+                  item.service_protocol | lower,
+                  item.group_id,
+                  item.action | lower,
+                  item.device_group
+                ] | join('|')
+              }}
 
-    - name: Normalize combined firewall rules
-      ansible.builtin.set_fact:
-        combined_firewall_rules_destination: "{{ combined_firewall_rules_destination | default([]) + [normalized_rule_destination] }}"
-      loop: "{{ combined_rules_destination.values() | list }}"
-      vars:
-        normalized_rule_destination: >-
-          {{
-            item | combine({
-              'destination_address': item.destination_address | unique | sort,
-              'destination_name': item.destination_name | unique | sort
-            })
-          }}
+        - name: Normalize combined firewall rules
+          ansible.builtin.set_fact:
+            combined_firewall_rules_destination: "{{ combined_firewall_rules_destination | default([]) + [normalized_rule_destination] }}"
+          loop: "{{ combined_rules_destination.values() | list }}"
+          vars:
+            normalized_rule_destination: >-
+              {{
+                item | combine({
+                  'destination_address': item.destination_address | unique | sort,
+                  'destination_name': item.destination_name | unique | sort
+                })
+              }}
 
+    - name: Build destination-port rulebase
+      when: combine in ['source-port']
+      block:
 
-    - name: Build combined firewall rules source
-      ansible.builtin.set_fact:
-        combined_rules_source: >-
-          {{
-            current_combined_rules_source |
-            combine({
-              rule_key: {
-                'description': item.description,
-                'source_ci': item.source_ci,
-                'source_address':
-                  (
-                    current_combined_rules_source[rule_key].source_address
-                    | default([])
-                    if rule_key in current_combined_rules_source else []
-                  )
-                  + [item.source_address],
-                'source_name':
-                  (
-                    current_combined_rules_source[rule_key].source_name
-                    | default([])
-                    if rule_key in current_combined_rules_source else []
-                  )
-                  + [item.source_name],
-                'destination_ci': item.destination_ci,
-                'destination_address': item.destination_address,
-                'destination_name': item.destination_name,
-                'source_zone': item.source_zone,
-                'destination_zone': item.destination_zone,
-                'application': item.application,
-                'service_protocol': item.service_protocol | lower,
-                'group_id': item.group_id,
-                'action': item.action | lower,
-                'device_group': item.device_group,
-                'service_destination_ports': item.service_destination_ports,
+        - name: Build combined firewall rules source
+          ansible.builtin.set_fact:
+            combined_rules_source: >-
+              {{
+                current_combined_rules_source |
+                combine({
+                  rule_key: {
+                    'description': item.description,
+                    'source_ci': item.source_ci,
+                    'source_address':
+                      (
+                        current_combined_rules_source[rule_key].source_address
+                        | default([])
+                        if rule_key in current_combined_rules_source else []
+                      )
+                      + [item.source_address],
+                    'source_name':
+                      (
+                        current_combined_rules_source[rule_key].source_name
+                        | default([])
+                        if rule_key in current_combined_rules_source else []
+                      )
+                      + [item.source_name],
+                    'destination_ci': item.destination_ci,
+                    'destination_address': item.destination_address,
+                    'destination_name': item.destination_name,
+                    'source_zone': item.source_zone,
+                    'destination_zone': item.destination_zone,
+                    'application': item.application,
+                    'service_protocol': item.service_protocol | lower,
+                    'group_id': item.group_id,
+                    'action': item.action | lower,
+                    'device_group': item.device_group,
+                    'service_destination_ports': item.service_destination_ports,
 
-                'rows':
-                  (
-                    current_combined_rules_source[rule_key].rows
-                    | default([])
-                    if rule_key in current_combined_rules_source else []
-                  )
-                  + [item.rows]
-              }
-            }, recursive=true)
-          }}
-      loop: "{{ combined_firewall_rules }}"
-      vars:
-        current_combined_rules_source: "{{ combined_rules_source | default({}) }}"
-        rule_key: >-
-          {{
-            [
-              item.description,
-              item.destination_address,
-              item.destination_name,
-              item.source_ci,
-              item.destination_ci,
-              item.source_zone,
-              item.destination_zone,
-              item.service_protocol | lower,
-              item.group_id,
-              item.action | lower,
-              item.device_group
-            ] | join('|')
-          }}
+                    'rows':
+                      (
+                        current_combined_rules_source[rule_key].rows
+                        | default([])
+                        if rule_key in current_combined_rules_source else []
+                      )
+                      + [item.rows]
+                  }
+                }, recursive=true)
+              }}
+          loop: "{{ combined_firewall_rules }}"
+          vars:
+            current_combined_rules_source: "{{ combined_rules_source | default({}) }}"
+            rule_key: >-
+              {{
+                [
+                  item.description,
+                  item.destination_address,
+                  item.destination_name,
+                  item.source_ci,
+                  item.destination_ci,
+                  item.source_zone,
+                  item.destination_zone,
+                  item.service_protocol | lower,
+                  item.group_id,
+                  item.action | lower,
+                  item.device_group
+                ] | join('|')
+              }}
 
-    - name: Normalize combined firewall rules
-      ansible.builtin.set_fact:
-        combined_firewall_rules_source: "{{ combined_firewall_rules_source | default([]) + [normalized_rule_source] }}"
-      loop: "{{ combined_rules_source.values() | list }}"
-      vars:
-        normalized_rule_source: >-
-          {{
-            item | combine({
-              'source_address': item.source_address | unique | sort,
-              'source_name': item.source_name | unique | sort
-            })
-          }}
+        - name: Normalize combined firewall rules
+          ansible.builtin.set_fact:
+            combined_firewall_rules_source: "{{ combined_firewall_rules_source | default([]) + [normalized_rule_source] }}"
+          loop: "{{ combined_rules_source.values() | list }}"
+          vars:
+            normalized_rule_source: >-
+              {{
+                item | combine({
+                  'source_address': item.source_address | unique | sort,
+                  'source_name': item.source_name | unique | sort
+                })
+              }}
 
     - name: Show combined rules
       ansible.builtin.debug:
