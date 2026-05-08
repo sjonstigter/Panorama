@@ -214,7 +214,7 @@
 
     - name: Normalize combined firewall rules
       ansible.builtin.set_fact:
-        combined_firewall_rules_destination: "{{ combined_firewall_rules_destination | default([]) + [normalized_rule] }}"
+        combined_firewall_rules_destination: "{{ combined_firewall_rules_destination | default([]) + [normalized_rule_destination] }}"
       loop: "{{ combined_rules_destination.values() | list }}"
       vars:
         normalized_rule_destination: >-
