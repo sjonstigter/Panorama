@@ -163,7 +163,13 @@
                     if rule_key in current_combined_rules_destination else []
                   )
                   + [item.destination_address],
-                'destination_name': item.destination_name,
+                'destination_name':
+                  (
+                    current_combined_rules_destination[rule_key].destination_name
+                    | default([])
+                    if rule_key in current_combined_rules_destination else []
+                  )
+                  + [item.destination_name],
                 'destination_ci': item.destination_ci,
                 'source_zone': item.source_zone,
                 'destination_zone': item.destination_zone,
@@ -214,7 +220,8 @@
         normalized_rule_destination: >-
           {{
             item | combine({
-              'destination_address': item.destination_address | unique | sort
+              'destination_address': item.destination_address | unique | sort,
+              'destination_name': item.destination_name | unique | sort
             })
           }}
 
