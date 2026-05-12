@@ -1,5 +1,8 @@
 [panorama]
 panorama.zero-days.nl
 
+[nios]
+infoblox.zero-days.nl
+
 [terraform]
 terraform.zero-days.nl ansible_user=sstigter ansible_connection=ssh
