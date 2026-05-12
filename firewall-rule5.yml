@@ -5,7 +5,7 @@
   gather_facts: false
 
   vars_files:
-    - vault/vault-fwrules.yml
+    - vault/vault
 
   vars:
     group_tag: "myapp2"
