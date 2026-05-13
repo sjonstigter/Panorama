@@ -67,7 +67,7 @@
       ['ERR-DG-NOT-FOUND-OR-INVALID']
       {%- endif -%}
 
-- name: Add resolved row to firewall_rules_resolved
+- name: Add resolved row to firewall_rules_resolved using Python filter plugin
   ansible.builtin.set_fact:
     firewall_rules_resolved: >-
       {{
