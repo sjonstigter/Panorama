@@ -8,7 +8,7 @@
     - vault/vault-fwrules.yml
 
   vars:
-    combine_mode: "{{ combine_mode | default('none') }}"
+    firewall_combine_mode: "{{ combine | default('none') }}"
 
     group_tag: "myapp2"
     infoblox_host: infoblox.zero-days.nl
@@ -66,12 +66,12 @@
         combined_firewall_rules: >-
           {{
             firewall_rules_resolved
-            | combine_firewall_rules(combine_mode)
+            | combine_firewall_rules(firewall_combine_mode)
           }}
 
-    - name: Show combine mode
+    - name: Show firewall combine mode
       ansible.builtin.debug:
-        var: combine_mode
+        var: firewall_combine_mode
 
     - name: Show resolved firewall rules
       ansible.builtin.debug:
