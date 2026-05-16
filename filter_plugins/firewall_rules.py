@@ -12,7 +12,7 @@ def combine_firewall_rules(rules, combine_mode="none"):
             rule.get("device_group"),
         ]
 
-        if combine_mode == "none":
+        if combine_mode == "port":
             key_parts.extend([
                 rule.get("source_address"),
                 rule.get("source_name"),
