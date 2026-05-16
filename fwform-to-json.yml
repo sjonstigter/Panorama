@@ -17,7 +17,7 @@
 
     - name: Store firewall form JSON output as variable
       ansible.builtin.set_fact:
-        firewall_rules: "{{ fwform_json_output.stdout | from_json }}"
+        firewall_rules: "{{ (fwform_json_output.stdout | from_json).firewall_rules }}"
 
     - name: Set stat to pass variables along the workflow
       ansible.builtin.set_stats:
