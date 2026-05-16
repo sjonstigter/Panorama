@@ -5,7 +5,7 @@
 
   vars:
     automation_root: "/home/sstigter/python/fwform"
-    form_name: "ORD-64839.xlsx"
+#    form_name: "ORD-64839.xlsx"
 
   tasks:
     - name: Run python script to convert firewall form to JSON
@@ -22,5 +22,5 @@
     - name: Set stat to pass variables along the workflow
       ansible.builtin.set_stats:
         data:
-          combine: "{{ combine }}"
+          combine: "{{ combine | default('port') }}"
           firewall_rules: "{{ firewall_rules }}"
