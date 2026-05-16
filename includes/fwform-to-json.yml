@@ -1,0 +1,26 @@
+---
+- name: FW form to JSON
+  hosts: "sdipnsec"
+  gather_facts: false
+
+  vars:
+    automation_root: "/home/_svc_paloalto_rules_automation/python/fwform"
+    form_name: "ORD-64839.xlsx"
+
+  tasks:
+    - name: Run python script to convert firewall form to JSON
+      ansible.builtin.command: python3.12 fwform-to-json.py forms/{{ form_name }}
+      args:
+        chdir: "{{ automation_root }}"
+      register: fwform_json_output
+      changed_when: false
+
+    - name: Store firewall form JSON output as variable
+      ansible.builtin.set_fact:
+        firewall_rules: "{{ fwform_json_output.stdout | from_json }}"
+
+    - name: Set stat to pass variables along the workflow
+      ansible.builtin.set_stats:
+        data:
+          combine: "{{ combine }}"
+          firewall_rules: "{{ firewall_rules }}"
