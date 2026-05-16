@@ -4,7 +4,7 @@
   gather_facts: false
 
   vars:
-    automation_root: "/home/_svc_paloalto_rules_automation/python/fwform"
+    automation_root: "/home/sstigter/python/fwform"
     form_name: "ORD-64839.xlsx"
 
   tasks:
