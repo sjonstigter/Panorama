@@ -25,7 +25,7 @@ def main():
 
     file_path = args.file_path
 
-    # Sheets to read (0-based index → Excel sheet 4 and 5)
+    # Sheets to read (0-based index -> Excel sheet 4 and 5)
     sheets = [3, 4]
 
     dfs = []
@@ -34,7 +34,7 @@ def main():
         df = pd.read_excel(
             file_path,
             sheet_name=sheet,
-            usecols="B:R",
+            usecols="B:V",
             skiprows=11,
             nrows=17
         )
@@ -73,7 +73,11 @@ def main():
             "Protocol": "service_protocol",
             "Port(s)": "service_destination_port",
             "Action": "action",
-            "Persistent Rule": "persistent"
+            "Persistent Rule": "persistent",
+            "Leverancier": "supplier",
+            "Regel omschrijving": "rule_description2",
+            "Source Task for": "source_task",
+            "Destination Task for": "destination_task"
         })
 
         # Drop empty "Unnamed" columns
@@ -93,6 +97,12 @@ def main():
     df["action"] = df["action"].replace({
         "Permit": "allow",
         "Deny": "deny"
+    })
+
+    # Normalize persistent values
+    df["persistent"] = df["persistent"].replace({
+        "Yes": True,
+        "No": False
     })
 
     # Convert pandas NaN → Python None, so JSON shows null
