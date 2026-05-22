@@ -1,4 +1,4 @@
-def combine_firewall_rules(rules, combine_mode="none"):
+def combine_firewall_rules(rules, combine_mode="port"):
     combined = {}
 
     for rule in rules:
@@ -9,6 +9,9 @@ def combine_firewall_rules(rules, combine_mode="none"):
             rule.get("service_protocol", "").lower(),
             rule.get("group_id"),
             rule.get("action", "").lower(),
+            rule.get("persistent","").lower(),
+            rule.get("source_task"),
+            rule.get("destination_task"),
             rule.get("device_group"),
         ]
 
@@ -46,6 +49,9 @@ def combine_firewall_rules(rules, combine_mode="none"):
                 "service_protocol": rule.get("service_protocol", "").lower(),
                 "group_id": rule.get("group_id"),
                 "action": rule.get("action", "").lower(),
+                "persistent": rule.get("persistent", "").lower(),
+                "source_task": rule.get("source_task"),
+                "destination_task": rule.get("destination_task"),
                 "device_group": rule.get("device_group"),
                 "applications": [],
                 "service_destination_ports": [],
