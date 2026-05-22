@@ -5,7 +5,7 @@ panorama.zero-days.nl
 infoblox.zero-days.nl
 
 [terraform]
-terraform.zero-days.nl ansible_user=sstigter ansible_connection=ssh
+terraform.zero-days.nl ansible_connection=ssh
 
 [sdipnsec]
-terraform.zero-days.nl ansible_user=sstigter ansible_connection=ssh
+terraform.zero-days.nl ansible_connection=ssh
