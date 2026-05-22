@@ -1,0 +1,5 @@
+            "Persistent Rule": "persistent",
+            "Leverancier": "supplier",
+            "Regel omschrijving": "rule_description2",
+            "Source Task for": "source_task",
+            "Destination Task for": "destination_task"
