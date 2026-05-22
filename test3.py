@@ -20,6 +20,26 @@ def parse_args():
     return parser.parse_args()
 
 
+def multiline_to_list(value):
+    """
+    Convert multiline Excel cell values to a clean Python list.
+
+    Example:
+      "443\\n554-560\\n605"
+
+    Becomes:
+      ["443", "554-560", "605"]
+    """
+    if pd.isna(value):
+        return []
+
+    return [
+        item.strip()
+        for item in str(value).splitlines()
+        if item.strip()
+    ]
+
+
 def main():
     args = parse_args()
 
@@ -104,6 +124,9 @@ def main():
         "Yes": True,
         "No": False
     })
+
+    # Convert multiline service destination ports to an Ansible-usable list
+    df["service_destination_port"] = df["service_destination_port"].apply(multiline_to_list)
 
     # Convert pandas NaN → Python None, so JSON shows null
     df = df.astype(object).where(pd.notna(df), None)
