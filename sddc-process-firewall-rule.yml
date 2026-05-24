@@ -1,0 +1,89 @@
+---
+- name: Process firewall rule
+  hosts: "panorama"
+  connection: local
+  gather_facts: false
+
+  vars:
+    provider:
+      ip_address: "{{ inventory_hostname }}"
+      username: '{{ lookup("env", "ANSIBLE_NET_USERNAME") }}'
+      password: '{{ lookup("env", "ANSIBLE_NET_PASSWORD") }}'
+
+  tasks:
+    - name: Get address objects from Panorama
+      paloaltonetworks.panos.panos_address_object:
+        provider: "{{ provider }}"
+        state: gathered
+        gathered_filter: "*"
+      register: gathered_address_objects
+
+    - name: Build list of requested source addresses
+      ansible.builtin.set_fact:
+        requested_source_addresses: >-
+          {{
+            combined_firewall_rules
+            | map(attribute='sources')
+            | flatten
+            | map(attribute='address')
+            | unique
+            | list
+          }}
+
+    - name: Build list of existing Panorama address object values
+      ansible.builtin.set_fact:
+        existing_address_values: >-
+          {{
+            gathered_address_objects.gathered
+            | map(attribute='value')
+            | list
+          }}
+
+    - name: Determine missing source addresses
+      ansible.builtin.set_fact:
+        missing_source_addresses: >-
+          {{
+            requested_source_addresses
+            | difference(existing_address_values)
+          }}
+
+#    - name: Create missing address objects
+#      ansible.builtin.include_tasks: includes/create-address-object.yml
+#      loop: "{{ missing_source_addresses }}"
+#      loop_control:
+#        loop_var: address
+#      vars:
+#        terraform_root: "/home/sstigter/panorama"
+#        address_objects_file: "{{ terraform_root }}/address_objects.yaml"
+
+    - name: Build address value to object name map
+      ansible.builtin.set_fact:
+        address_object_map: >-
+          {{
+            address_object_map | default({}) |
+            combine({
+              item.value: item.name
+            })
+          }}
+      loop: "{{ gathered_address_objects.gathered }}"
+
+    - name: Build final combined firewall rules with source_addresses
+      ansible.builtin.set_fact:
+        combined_firewall_rules_resolved: >-
+          {{
+            combined_firewall_rules_resolved | default([]) +
+            [
+              item | combine({
+                'source_addresses':
+                  item.sources
+                  | map(attribute='address')
+                  | map('extract', address_object_map)
+                  | list
+              })
+            ]
+          }}
+      loop: "{{ combined_firewall_rules }}"
+
+    - name: Overwrite combined_firewall_rules with resolved version
+      ansible.builtin.set_fact:
+        combined_firewall_rules: "{{ combined_firewall_rules_resolved }}"
