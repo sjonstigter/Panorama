@@ -18,16 +18,14 @@
         gathered_filter: "*"
       register: gathered_address_objects
 
-    - name: Build list of requested source addresses
+    - name: Build requested source objects
       ansible.builtin.set_fact:
-        requested_source_addresses: >-
+        requested_sources: >-
           {{
             combined_firewall_rules
             | map(attribute='sources')
             | flatten
-            | map(attribute='address')
-            | unique
-            | list
+            | unique(attribute='address')
           }}
 
     - name: Build list of existing Panorama address object values
@@ -39,19 +37,20 @@
             | list
           }}
 
-    - name: Determine missing source addresses
+    - name: Determine missing source objects
       ansible.builtin.set_fact:
-        missing_source_addresses: >-
+        missing_sources: >-
           {{
-            requested_source_addresses
-            | difference(existing_address_values)
+            requested_sources
+            | rejectattr('address', 'in', existing_address_values)
+            | list
           }}
 
     - name: Create missing address objects
       ansible.builtin.include_tasks: includes/create-address-object.yml
-      loop: "{{ missing_source_addresses }}"
+      loop: "{{ missing_sources }}"
       loop_control:
-        loop_var: address
+        loop_var: source
 
     - name: Build address value to object name map
       ansible.builtin.set_fact:
