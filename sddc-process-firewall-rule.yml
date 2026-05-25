@@ -66,9 +66,9 @@
 
     - name: Build final combined firewall rules with source_addresses
       ansible.builtin.set_fact:
-        combined_firewall_rules_resolved: >-
+        combined_firewall_rules_resolved_source: >-
           {{
-            combined_firewall_rules_resolved | default([]) +
+            combined_firewall_rules_resolved_source | default([]) +
             [
               item | combine({
                 'source_addresses':
@@ -83,7 +83,7 @@
 
     - name: Overwrite combined_firewall_rules with resolved version
       ansible.builtin.set_fact:
-        combined_firewall_rules: "{{ combined_firewall_rules_resolved }}"
+        combined_firewall_rules: "{{ combined_firewall_rules_resolved_source }}"
 
 # Destination address function
     - name: Get address objects from Panorama
@@ -140,9 +140,9 @@
 
     - name: Build final combined firewall rules with destination_addresses
       ansible.builtin.set_fact:
-        combined_firewall_rules_resolved: >-
+        combined_firewall_rules_resolved_destination: >-
           {{
-            combined_firewall_rules_resolved | default([]) +
+            combined_firewall_rules_resolved_destination | default([]) +
             [
               item | combine({
                 'destination_addresses':
@@ -157,4 +157,4 @@
 
     - name: Overwrite combined_firewall_rules with resolved version
       ansible.builtin.set_fact:
-        combined_firewall_rules: "{{ combined_firewall_rules_resolved }}"
+        combined_firewall_rules: "{{ combined_firewall_rules_resolved_destination }}"
