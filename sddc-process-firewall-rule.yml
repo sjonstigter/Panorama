@@ -138,7 +138,7 @@
           }}
       loop: "{{ gathered_address_objects.gathered }}"
 
-    - name: Build final combined firewall rules with source_addresses
+    - name: Build final combined firewall rules with destination_addresses
       ansible.builtin.set_fact:
         combined_firewall_rules_resolved: >-
           {{
