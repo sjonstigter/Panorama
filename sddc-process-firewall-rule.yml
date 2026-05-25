@@ -146,7 +146,7 @@
             [
               item | combine({
                 'destination_addresses':
-                  item.sources
+                  item.destinations
                   | map(attribute='address')
                   | map('extract', address_object_map)
                   | list
