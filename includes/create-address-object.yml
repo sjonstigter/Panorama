@@ -1,17 +1,17 @@
 ---
 - name: Determine if source and destination IPs are host or network
   ansible.builtin.set_fact:
-    source_is_host: "{{ '/' not in sources.address or sources.address.endswith('/32') }}"
-    source_is_network: "{{ '/' in sources.address and not sources.address.endswith('/32') }}"
+    source_is_host: "{{ '/' not in address or address.endswith('/32') }}"
+    source_is_network: "{{ '/' in address and not address.endswith('/32') }}"
 
 - name: Set source host address object name
   ansible.builtin.set_fact:
-    address_object_name: "ip_{{ sources.address | replace('/','_') }}"
+    address_object_name: "ip_{{ address | replace('/','_') }}"
   when: source_is_host
 
 - name: Set source network address object name
   ansible.builtin.set_fact:
-    address_object_name: "net_{{ sources.address | replace('/','_') }}"
+    address_object_name: "net_{{ address | replace('/','_') }}"
   when: source_is_network
 
 ##- name: Set destination host address object name
@@ -36,7 +36,7 @@
 
 - name: Set source host address value
   ansible.builtin.set_fact:
-    address_object_value: "{{ sources.address }}"
+    address_object_value: "{{ address }}"
   when: source_is_host or source_is_network
 
 #- name: Set destination host address value
@@ -44,52 +44,52 @@
 #    address_object_value: "{{ destination_address }}"
 #  when: destination_is_host or destination_is_network
 
-- name: Check whether address_objects.yaml exists
-  ansible.builtin.stat:
-    path: "{{ address_objects_file }}"
-  register: address_objects_file_stat
-  delegate_to: terraform.zero-days.nl
+#- name: Check whether address_objects.yaml exists
+#  ansible.builtin.stat:
+#    path: "{{ address_objects_file }}"
+#  register: address_objects_file_stat
+#  delegate_to: terraform.zero-days.nl
 
-- name: Read address_objects.yaml if present
-  ansible.builtin.slurp:
-    src: "{{ address_objects_file }}"
-  register: address_objects_file_raw
-  when: address_objects_file_stat.stat.exists
-  delegate_to: terraform.zero-days.nl
+#- name: Read address_objects.yaml if present
+#  ansible.builtin.slurp:
+#    src: "{{ address_objects_file }}"
+#  register: address_objects_file_raw
+#  when: address_objects_file_stat.stat.exists
+#  delegate_to: terraform.zero-days.nl
 
-- name: Parse existing YAML content
-  ansible.builtin.set_fact:
-    address_objects_data: >-
-      {{
-        (address_objects_file_raw.content | b64decode | from_yaml)
-        if address_objects_file_stat.stat.exists
-        else {'address_objects': []}
-      }}
+#- name: Parse existing YAML content
+#  ansible.builtin.set_fact:
+#    address_objects_data: >-
+#      {{
+#        (address_objects_file_raw.content | b64decode | from_yaml)
+#        if address_objects_file_stat.stat.exists
+#        else {'address_objects': []}
+#      }}
 
-- name: Define desired source address object
-  ansible.builtin.set_fact:
-    new_address_object:
-      name: "{{ address_object_name }}"
-      value: "{{ address_object_value }}"
-      type: "{{ source_address_type | default('ip-netmask') }}"
-      description: "{{ source_address_description | default('Managed by AWX') }}"
+#- name: Define desired source address object
+#  ansible.builtin.set_fact:
+#    new_address_object:
+#      name: "{{ address_object_name }}"
+#      value: "{{ address_object_value }}"
+#      type: "{{ source_address_type | default('ip-netmask') }}"
+#      description: "{{ source_address_description | default('Managed by AWX') }}"
 
-- name: Merge address object into address object list
-  ansible.builtin.set_fact:
-    merged_address_objects: >-
-      {{
-        (
-          address_objects_data.address_objects
-          | rejectattr('name', 'equalto', new_address_object.name)
-          | list
-        )
-        + [new_address_object]
-      }}
+#- name: Merge address object into address object list
+#  ansible.builtin.set_fact:
+#    merged_address_objects: >-
+#      {{
+#        (
+#          address_objects_data.address_objects
+#          | rejectattr('name', 'equalto', new_address_object.name)
+#          | list
+#        )
+#        + [new_address_object]
+#      }}
 
-- name: Build updated address objects data
-  ansible.builtin.set_fact:
-    updated_address_objects_data:
-      address_objects: "{{ merged_address_objects }}"
+#- name: Build updated address objects data
+#  ansible.builtin.set_fact:
+#    updated_address_objects_data:
+#      address_objects: "{{ merged_address_objects }}"
 
 #- name: Write address_objects.yaml
 #  ansible.builtin.copy:
