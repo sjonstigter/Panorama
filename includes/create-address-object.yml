@@ -1,25 +1,24 @@
 ---
-- name: Determine if source and destination IPs are host or network
+- name: Determine if address is host or network
   ansible.builtin.set_fact:
-    source_is_host: "{{ '/' not in address or address.endswith('/32') }}"
-    source_is_network: "{{ '/' in address and not address.endswith('/32') }}"
+    address_is_host: "{{ '/' not in address or address.endswith('/32') }}"
+    address_is_network: "{{ '/' in address and not address.endswith('/32') }}"
 
 - name: Set source host address object name
   ansible.builtin.set_fact:
     address_object_name: "ip_{{ address | replace('/','_') }}"
-  when: source_is_host
+  when: address_is_host
 
 - name: Set source network address object name
   ansible.builtin.set_fact:
     address_object_name: "net_{{ address | replace('/','_') }}"
-  when: source_is_network
+  when: address_is_network
 
-- name: Set source host address value
+- name: Set host address value
   ansible.builtin.set_fact:
     address_object_value: "{{ address }}"
-  when: source_is_host or source_is_network
 
-- name: CREATE NETWORK OBJECT
+- name: Create address object on Panorama
   paloaltonetworks.panos.panos_address_object:
     provider: "{{ provider }}"
     name: "{{ address_object_name }}"
