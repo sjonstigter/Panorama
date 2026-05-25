@@ -123,7 +123,7 @@
 
     - name: Create missing address objects
       ansible.builtin.include_tasks: includes/create-address-object.yml
-      loop: "{{ missing_sources }}"
+      loop: "{{ missing_destinations }}"
       loop_control:
         loop_var: destination
 
