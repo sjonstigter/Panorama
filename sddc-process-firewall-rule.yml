@@ -112,7 +112,7 @@
             | list
           }}
 
-    - name: Determine missing source objects
+    - name: Determine missing destination objects
       ansible.builtin.set_fact:
         missing_destinations: >-
           {{
@@ -120,3 +120,41 @@
             | rejectattr('address', 'in', existing_address_values)
             | list
           }}
+
+    - name: Create missing address objects
+      ansible.builtin.include_tasks: includes/create-address-object.yml
+      loop: "{{ missing_sources }}"
+      loop_control:
+        loop_var: destination
+
+    - name: Build address value to object name map
+      ansible.builtin.set_fact:
+        address_object_map: >-
+          {{
+            address_object_map | default({}) |
+            combine({
+              item.value: item.name
+            })
+          }}
+      loop: "{{ gathered_address_objects.gathered }}"
+
+    - name: Build final combined firewall rules with source_addresses
+      ansible.builtin.set_fact:
+        combined_firewall_rules_resolved: >-
+          {{
+            combined_firewall_rules_resolved | default([]) +
+            [
+              item | combine({
+                'destination_addresses':
+                  item.sources
+                  | map(attribute='address')
+                  | map('extract', address_object_map)
+                  | list
+              })
+            ]
+          }}
+      loop: "{{ combined_firewall_rules }}"
+
+    - name: Overwrite combined_firewall_rules with resolved version
+      ansible.builtin.set_fact:
+        combined_firewall_rules: "{{ combined_firewall_rules_resolved }}"

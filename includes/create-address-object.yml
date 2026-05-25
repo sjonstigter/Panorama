@@ -1,9 +1,20 @@
 ---
 - name: Normalise vaules
+  # use better block
   ansible.builtin.set_fact:
-    address: "{{ source.address }}"
-    name: "{{ source.name }}"
-    ci: "{{ source.ci }}"
+    address: "{{ source.address | default(destination.address) }}"
+    name: >-
+      {{
+        source.name
+        | default(destination.name, true)
+        | default('', true)
+      }}
+    ci: >-
+      {{
+        source.ci
+        | default(destination.ci, true)
+        | default('', true)
+      }}
 
 - name: Determine if address is host or network
   ansible.builtin.set_fact:
