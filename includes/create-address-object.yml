@@ -1,4 +1,10 @@
 ---
+- name: Normalise vaules
+  ansible.builtin.set_fact:
+    address: "{{ source.address }}"
+    name: "{{ source.name }}"
+    ci: "{{ source.ci }}"
+
 - name: Determine if address is host or network
   ansible.builtin.set_fact:
     address_is_host: "{{ '/' not in address or address.endswith('/32') }}"
