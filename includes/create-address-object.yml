@@ -1,4 +1,9 @@
 ---
+- name: Determine if source and destination IPs are host or network
+  ansible.builtin.set_fact:
+    source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
+    source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
+
 - name: Set source host address object name
   ansible.builtin.set_fact:
     address_object_name: "ip_{{ source_address | replace('/','_') }}"
@@ -9,35 +14,35 @@
     address_object_name: "net_{{ source_address | replace('/','_') }}"
   when: source_is_network
 
+##- name: Set destination host address object name
+##  ansible.builtin.set_fact:
+##    address_object_name: "ip_{{ destination_address | replace('/','_') }}"
 #- name: Set destination host address object name
 #  ansible.builtin.set_fact:
-#    address_object_name: "ip_{{ destination_address | replace('/','_') }}"
-- name: Set destination host address object name
-  ansible.builtin.set_fact:
-    address_object_name: >-
-      {{
-        (destination_name | default('') | trim | length > 0)
-        | ternary(
-            destination_name ~ ' - ' ~ (destination_address | replace('/', '_')),
-            'ip_' ~ (destination_address | replace('/', '_'))
-          )
-      }}
-  when: destination_is_host
+#    address_object_name: >-
+#      {{
+#        (destination_name | default('') | trim | length > 0)
+#        | ternary(
+#            destination_name ~ ' - ' ~ (destination_address | replace('/', '_')),
+#            'ip_' ~ (destination_address | replace('/', '_'))
+#          )
+#      }}
+#  when: destination_is_host
 
-- name: Set destination network address object name
-  ansible.builtin.set_fact:
-    address_object_name: "net_{{ destination_address | replace('/','_') }}"
-  when: destination_is_network
+#- name: Set destination network address object name
+#  ansible.builtin.set_fact:
+#    address_object_name: "net_{{ destination_address | replace('/','_') }}"
+#  when: destination_is_network
 
 - name: Set source host address value
   ansible.builtin.set_fact:
     address_object_value: "{{ source_address }}"
   when: source_is_host or source_is_network
 
-- name: Set destination host address value
-  ansible.builtin.set_fact:
-    address_object_value: "{{ destination_address }}"
-  when: destination_is_host or destination_is_network
+#- name: Set destination host address value
+#  ansible.builtin.set_fact:
+#    address_object_value: "{{ destination_address }}"
+#  when: destination_is_host or destination_is_network
 
 - name: Check whether address_objects.yaml exists
   ansible.builtin.stat:
@@ -119,18 +124,18 @@
     gathered_filter: '*'
   register: gathered_address_objects
 
-- name: Find firewall source object based on input variable - Search for address object
-  ansible.builtin.set_fact:
-    source_address_object: >-
-      {{ gathered_address_objects.gathered
-        | selectattr('value', 'search', source_address)
-        | map(attribute='name')
-        | list }}
+#- name: Find firewall source object based on input variable - Search for address object
+#  ansible.builtin.set_fact:
+#    source_address_object: >-
+#      {{ gathered_address_objects.gathered
+#        | selectattr('value', 'search', source_address)
+#        | map(attribute='name')
+#        | list }}
 
-- name: Find firewall destination object based on input variable - Search for address object
-  ansible.builtin.set_fact:
-    destination_address_object: >-
-      {{ gathered_address_objects.gathered
-        | selectattr('value', 'search', destination_address)
-        | map(attribute='name')
-        | list }}
+#- name: Find firewall destination object based on input variable - Search for address object
+#  ansible.builtin.set_fact:
+#    destination_address_object: >-
+#      {{ gathered_address_objects.gathered
+#        | selectattr('value', 'search', destination_address)
+#        | map(attribute='name')
+#        | list }}
