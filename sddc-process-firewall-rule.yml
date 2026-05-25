@@ -47,14 +47,14 @@
             | difference(existing_address_values)
           }}
 
-#    - name: Create missing address objects
-#      ansible.builtin.include_tasks: includes/create-address-object.yml
-#      loop: "{{ missing_source_addresses }}"
-#      loop_control:
-#        loop_var: address
-#      vars:
-#        terraform_root: "/home/sstigter/panorama"
-#        address_objects_file: "{{ terraform_root }}/address_objects.yaml"
+    - name: Create missing address objects
+      ansible.builtin.include_tasks: includes/create-address-object.yml
+      loop: "{{ missing_source_addresses }}"
+      loop_control:
+        loop_var: address
+      vars:
+        terraform_root: "/home/sstigter/panorama"
+        address_objects_file: "{{ terraform_root }}/address_objects.yaml"
 
     - name: Build address value to object name map
       ansible.builtin.set_fact:

@@ -1,17 +1,17 @@
 ---
 - name: Determine if source and destination IPs are host or network
   ansible.builtin.set_fact:
-    source_is_host: "{{ '/' not in source_address or source_address.endswith('/32') }}"
-    source_is_network: "{{ '/' in source_address and not source_address.endswith('/32') }}"
+    source_is_host: "{{ '/' not in sources.address or sources.address.endswith('/32') }}"
+    source_is_network: "{{ '/' in sources.address and not sources.address.endswith('/32') }}"
 
 - name: Set source host address object name
   ansible.builtin.set_fact:
-    address_object_name: "ip_{{ source_address | replace('/','_') }}"
+    address_object_name: "ip_{{ sources.address | replace('/','_') }}"
   when: source_is_host
 
 - name: Set source network address object name
   ansible.builtin.set_fact:
-    address_object_name: "net_{{ source_address | replace('/','_') }}"
+    address_object_name: "net_{{ sources.address | replace('/','_') }}"
   when: source_is_network
 
 ##- name: Set destination host address object name
@@ -36,7 +36,7 @@
 
 - name: Set source host address value
   ansible.builtin.set_fact:
-    address_object_value: "{{ source_address }}"
+    address_object_value: "{{ sources.address }}"
   when: source_is_host or source_is_network
 
 #- name: Set destination host address value
@@ -91,38 +91,38 @@
     updated_address_objects_data:
       address_objects: "{{ merged_address_objects }}"
 
-- name: Write address_objects.yaml
-  ansible.builtin.copy:
-    dest: "{{ address_objects_file }}"
-    content: "{{ updated_address_objects_data | to_nice_yaml(indent=2, sort_keys=False) }}"
-    mode: "0644"
-  delegate_to: terraform.zero-days.nl
+#- name: Write address_objects.yaml
+#  ansible.builtin.copy:
+#    dest: "{{ address_objects_file }}"
+#    content: "{{ updated_address_objects_data | to_nice_yaml(indent=2, sort_keys=False) }}"
+#    mode: "0644"
+#  delegate_to: terraform.zero-days.nl
 
-- name: Run terraform init
-  ansible.builtin.command: terraform init
-  args:
-    chdir: "{{ terraform_root }}"
-  delegate_to: terraform.zero-days.nl
+#- name: Run terraform init
+#  ansible.builtin.command: terraform init
+#  args:
+#    chdir: "{{ terraform_root }}"
+#  delegate_to: terraform.zero-days.nl
 
-- name: Run terraform plan
-  ansible.builtin.command: terraform plan -out=tfplan
-  args:
-    chdir: "{{ terraform_root }}"
-  delegate_to: terraform.zero-days.nl
+#- name: Run terraform plan
+#  ansible.builtin.command: terraform plan -out=tfplan
+#  args:
+#    chdir: "{{ terraform_root }}"
+#  delegate_to: terraform.zero-days.nl
 
-- name: Run terraform apply
-  ansible.builtin.command: terraform apply -auto-approve tfplan
-  args:
-    chdir: "{{ terraform_root }}"
-  delegate_to: terraform.zero-days.nl
+#- name: Run terraform apply
+#  ansible.builtin.command: terraform apply -auto-approve tfplan
+#  args:
+#    chdir: "{{ terraform_root }}"
+#  delegate_to: terraform.zero-days.nl
 
 # Turn to lookup module
-- name: Run lookup again to get address objects from Panorama
-  paloaltonetworks.panos.panos_address_object:
-    provider: "{{ provider }}"
-    state: 'gathered'
-    gathered_filter: '*'
-  register: gathered_address_objects
+#- name: Run lookup again to get address objects from Panorama
+#  paloaltonetworks.panos.panos_address_object:
+#    provider: "{{ provider }}"
+#    state: 'gathered'
+#    gathered_filter: '*'
+#  register: gathered_address_objects
 
 #- name: Find firewall source object based on input variable - Search for address object
 #  ansible.builtin.set_fact:
