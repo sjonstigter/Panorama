@@ -11,6 +11,7 @@
       password: '{{ lookup("env", "ANSIBLE_NET_PASSWORD") }}'
 
   tasks:
+  # Source Address function
     - name: Get address objects from Panorama
       paloaltonetworks.panos.panos_address_object:
         provider: "{{ provider }}"
@@ -83,3 +84,39 @@
     - name: Overwrite combined_firewall_rules with resolved version
       ansible.builtin.set_fact:
         combined_firewall_rules: "{{ combined_firewall_rules_resolved }}"
+
+# Destination address function
+    - name: Get address objects from Panorama
+      paloaltonetworks.panos.panos_address_object:
+        provider: "{{ provider }}"
+        state: gathered
+        gathered_filter: "*"
+      register: gathered_address_objects
+
+    - name: Build requested destination objects
+      ansible.builtin.set_fact:
+        requested_destinations: >-
+          {{
+            combined_firewall_rules
+            | map(attribute='destinations')
+            | flatten
+            | unique(attribute='address')
+          }}
+
+    - name: Build list of existing Panorama address object values
+      ansible.builtin.set_fact:
+        existing_address_values: >-
+          {{
+            gathered_address_objects.gathered
+            | map(attribute='value')
+            | list
+          }}
+
+    - name: Determine missing source objects
+      ansible.builtin.set_fact:
+        missing_destinations: >-
+          {{
+            requested_destinations
+            | rejectattr('address', 'in', existing_address_values)
+            | list
+          }}
