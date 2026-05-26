@@ -189,8 +189,10 @@
             normalised_service_destination_ports | map('string') | difference(existing_ports)
           }}
 
-#    - name: NEW Create missing service objects - loop through missing_ports we might have
-#      ansible.builtin.include_tasks: includes/create-service-object.yml
-#      loop: "{{ missing_ports }}"
-#      loop_control:
-#        loop_var: port
+    - name: NEW Create missing service objects - loop through missing_ports we might have
+      ansible.builtin.include_tasks: includes/create-service-object.yml
+      loop: "{{ missing_ports }}"
+      loop_control:
+        loop_var: port
+      vars:
+        protocol: "{{ normalised_service_protocol }}"
