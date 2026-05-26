@@ -3,7 +3,7 @@
   # use better block
   ansible.builtin.set_fact:
     address: "{{ source.address | default(destination.address) }}"
-    name: >-
+    obj_name: >-
       {{
         source.name
         | default(destination.name, true)
@@ -23,12 +23,12 @@
 
 - name: Set source host address object name
   ansible.builtin.set_fact:
-    address_object_name: "ip_{{ address | replace('/','_') }}"
+    address_object_name: "ip_{{ address | replace('/', '_') }}"
   when: address_is_host
 
 - name: Set source network address object name
   ansible.builtin.set_fact:
-    address_object_name: "net_{{ address | replace('/','_') }}"
+    address_object_name: "net_{{ address | replace('/', '_') }}"
   when: address_is_network
 
 - name: Set host address value
