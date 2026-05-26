@@ -163,6 +163,7 @@
     - name: Normalise input values for service_ports
       ansible.builtin.set_fact:
         normalised_service_destination_ports: "{{ combined_firewall_rules_resolved_destination[0].service_destination_ports[0] | from_yaml }}"
+        normalised_service_protocol: "{{ combined_firewall_rules_resolved_destination[0].service_protocol[0] }}"
 
     - name: Get service objects from Panorama
       paloaltonetworks.panos.panos_service_object:
@@ -176,7 +177,7 @@
         existing_ports: >-
           {{
             gathered_service_objects.gathered
-            | selectattr('protocol', 'equalto', service_protocol)
+            | selectattr('protocol', 'equalto', normalised_service_protocol)
             | map(attribute='destination_port')
             | list
           }}
