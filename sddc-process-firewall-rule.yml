@@ -178,7 +178,7 @@
           {{
             gathered_service_objects.gathered
             | selectattr('protocol', 'equalto', normalised_service_protocol)
-            | map(attribute='destination_port')
+            | map(attribute='normalised_service_destination_ports')
             | list
           }}
 
