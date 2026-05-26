@@ -195,4 +195,4 @@
       loop_control:
         loop_var: port
       vars:
-        protocol: "{{ normalised_service_protocol }}"
+        service_protocol: "{{ normalised_service_protocol }}"
