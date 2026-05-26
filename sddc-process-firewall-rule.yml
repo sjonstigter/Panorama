@@ -195,4 +195,5 @@
       loop_control:
         loop_var: port
       vars:
+        # variables to pass to include file
         service_protocol: "{{ normalised_service_protocol }}"
