@@ -158,3 +158,38 @@
     - name: Overwrite combined_firewall_rules with resolved version
       ansible.builtin.set_fact:
         combined_firewall_rules: "{{ combined_firewall_rules_resolved_destination }}"
+
+# Service_object functions
+    - name: Normalise input values for service_ports
+      ansible.builtin.set_fact:
+        normalised_service_destination_ports: "{{ service_destination_ports | from_yaml }}"
+
+    - name: Get service objects from Panorama
+      paloaltonetworks.panos.panos_service_object:
+        provider: "{{ provider }}"
+        state: 'gathered'
+        gathered_filter: '*'
+      register: gathered_service_objects
+
+    - name: Determine existing ports - Build list of all ports per defined protocol
+      ansible.builtin.set_fact:
+        existing_ports: >-
+          {{
+            gathered_service_objects.gathered
+            | selectattr('protocol', 'equalto', service_protocol)
+            | map(attribute='destination_port')
+            | list
+          }}
+
+    - name: NEW Determine missing ports - compare service_destination_port to existing_ports
+      ansible.builtin.set_fact:
+        missing_ports: >-
+          {{
+            normalised_service_destination_ports | map('string') | difference(existing_ports)
+          }}
+
+    - name: NEW Create missing service objects - loop through missing_ports we might have
+      ansible.builtin.include_tasks: includes/create-service-object.yml
+      loop: "{{ missing_ports }}"
+      loop_control:
+        loop_var: port
