@@ -27,3 +27,10 @@
         | map(attribute='name')
         | list
       }}
+
+- name: Get service objects from Panorama again after creating missing services
+  paloaltonetworks.panos.panos_service_object:
+    provider: "{{ provider }}"
+    state: gathered
+    gathered_filter: "*"
+  register: gathered_service_objects

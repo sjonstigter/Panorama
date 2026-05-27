@@ -197,3 +197,39 @@
       vars:
         # variables to pass to include file
         service_protocol: "{{ normalised_service_protocol }}"
+
+    - name: Build service port to first service object name map
+      ansible.builtin.set_fact:
+        service_object_map: >-
+          {{
+            service_object_map | default({}) |
+            combine({
+              item.destination_port: item.name
+            })
+          }}
+      loop: "{{ gathered_service_objects.gathered }}"
+      when:
+        - item.protocol == normalised_service_protocol
+        - item.destination_port not in (service_object_map | default({}))
+
+    - name: Build resolved service object names
+      ansible.builtin.set_fact:
+        resolved_services: >-
+          {{
+            normalised_service_destination_ports
+            | map('string')
+            | map('extract', service_object_map)
+            | list
+          }}
+
+- name: Add resolved services to combined firewall rule
+  ansible.builtin.set_fact:
+    combined_firewall_rules_resolved_end: >-
+      {{
+        combined_firewall_rules_resolved_end | default([]) +
+        [
+          combined_firewall_rules_resolved_destination[0] | combine({
+            'services': resolved_services
+          })
+        ]
+      }}
