@@ -38,7 +38,9 @@
     validate_certs: false
     return_content: true
   register: ib_network_lookup_src
-  when: source_is_host | bool and network_source_type != "external"
+  when: 
+    - source_is_host | bool
+    - network_source_type != "external"
 
 - name: Find network for host destination IP
   ansible.builtin.uri:
@@ -50,7 +52,9 @@
     validate_certs: false
     return_content: true
   register: ib_network_lookup_dst
-  when: destination_is_host | bool network_destination_type != "external"
+  when: 
+    - destination_is_host | bool 
+    - network_destination_type != "external"
 
 - name: Determine device_group based on network type from subnet_classes
   # Note sg_name vs ss-name (underscore) when setting final device_group names
