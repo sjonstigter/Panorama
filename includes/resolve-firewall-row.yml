@@ -38,7 +38,7 @@
     validate_certs: false
     return_content: true
   register: ib_network_lookup_src
-  when: 
+  when:
     - source_is_host | bool
     - network_source_type != "external"
 
@@ -52,8 +52,8 @@
     validate_certs: false
     return_content: true
   register: ib_network_lookup_dst
-  when: 
-    - destination_is_host | bool 
+  when:
+    - destination_is_host | bool
     - network_destination_type != "external"
 
 - name: Determine device_group based on network type from subnet_classes
