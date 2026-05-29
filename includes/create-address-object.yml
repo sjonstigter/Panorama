@@ -21,12 +21,12 @@
     address_is_host: "{{ '/' not in address or address.endswith('/32') }}"
     address_is_network: "{{ '/' in address and not address.endswith('/32') }}"
 
-- name: Set source host address object name
+- name: Set host address object name
   ansible.builtin.set_fact:
     address_object_name: "ip_{{ address | replace('/', '_') }}"
   when: address_is_host
 
-- name: Set source network address object name
+- name: Set network address object name
   ansible.builtin.set_fact:
     address_object_name: "net_{{ address | replace('/', '_') }}"
   when: address_is_network
