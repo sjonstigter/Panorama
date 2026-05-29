@@ -41,12 +41,12 @@
     loop_var: source
     label: "{{ source.name | default(source.address) }}"
 
-- name: Re-gather address objects from Panorama after source creation
-  paloaltonetworks.panos.panos_address_object:
-    provider: "{{ provider }}"
-    state: gathered
-    gathered_filter: "*"
-  register: gathered_address_objects
+#- name: Re-gather address objects from Panorama after source creation
+#  paloaltonetworks.panos.panos_address_object:
+#    provider: "{{ provider }}"
+#    state: gathered
+#    gathered_filter: "*"
+#  register: gathered_address_objects
 
 - name: Build address value to object name map
   ansible.builtin.set_fact:
@@ -106,12 +106,12 @@
     loop_var: destination
     label: "{{ destination.name | default(destination.address) }}"
 
-- name: Re-gather address objects from Panorama after destination creation
-  paloaltonetworks.panos.panos_address_object:
-    provider: "{{ provider }}"
-    state: gathered
-    gathered_filter: "*"
-  register: gathered_address_objects
+#- name: Re-gather address objects from Panorama after destination creation
+#  paloaltonetworks.panos.panos_address_object:
+#    provider: "{{ provider }}"
+#    state: gathered
+#    gathered_filter: "*"
+#  register: gathered_address_objects
 
 - name: Reset address value to object name map
   ansible.builtin.set_fact:
@@ -191,12 +191,12 @@
   vars:
     service_protocol: "{{ normalised_service_protocol }}"
 
-- name: Re-gather service objects from Panorama after service creation
-  paloaltonetworks.panos.panos_service_object:
-    provider: "{{ provider }}"
-    state: gathered
-    gathered_filter: "*"
-  register: gathered_service_objects
+#- name: Re-gather service objects from Panorama after service creation
+#  paloaltonetworks.panos.panos_service_object:
+#    provider: "{{ provider }}"
+#    state: gathered
+#    gathered_filter: "*"
+#  register: gathered_service_objects
 
 - name: Build service port to first service object name map
   ansible.builtin.set_fact:
