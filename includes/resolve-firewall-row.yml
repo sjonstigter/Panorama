@@ -89,7 +89,9 @@
             ib_network_lookup_src | default({}),
             ib_network_lookup_dst | default({}),
             source_zone | default(''),
+            az_source_zone | default(''),
             destination_zone | default(''),
+            az_destination_zone | default(''),
             device_group
           )
         ]
