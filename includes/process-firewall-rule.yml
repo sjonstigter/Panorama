@@ -243,15 +243,26 @@
         | list
       }}
 
+- name: Build unique destination CI list
+  ansible.builtin.set_fact:
+    destination_ci_list: >-
+      {{
+        rule.destinations
+        | map(attribute='ci')
+        | map('string')
+        | unique
+        | list
+      }}
+
 - name: Initialise resolved source tags
   ansible.builtin.set_fact:
-    resolved_source_tag: []
+    resolved_tag: []
 
 - name: Append matching Panorama source tags
   ansible.builtin.set_fact:
-    resolved_source_tag: >-
+    resolved_tag: >-
       {{
-        resolved_source_tag
+        resolved_tag
         +
         (
           gathered_tag_objects.gathered
@@ -265,9 +276,27 @@
   loop_control:
     label: "{{ item }}"
 
+- name: Append matching Panorama destination tags
+  ansible.builtin.set_fact:
+    resolved_tag: >-
+      {{
+        resolved_tag
+        +
+        (
+          gathered_tag_objects.gathered
+          | selectattr('name', 'search', item)
+          | rejectattr('name', 'match', '^0')
+          | map(attribute='name')
+          | list
+        )
+      }}
+  loop: "{{ destination_ci_list }}"
+  loop_control:
+    label: "{{ item }}"
+
 - name: Remove duplicate source tags
   ansible.builtin.set_fact:
-    resolved_source_tag: "{{ resolved_source_tag | unique | list }}"
+    resolved_tag: "{{ resolved_tag | unique | list }}"
 
 - name: Add resolved values to processed firewall rule list
   ansible.builtin.set_fact:
@@ -279,7 +308,7 @@
             'source_addresses': resolved_source_addresses,
             'destination_addresses': resolved_destination_addresses,
             'services': resolved_services,
-            'source_tags': resolved_source_tag
+            'tags': resolved_source_tag
           })
         ]
       }}
