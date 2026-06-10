@@ -13,6 +13,7 @@
 - name: Set source_zones - Match source_zones from subnet list and overwrite standard source_zones and type
   ansible.builtin.set_fact:
     source_zone: "{{ item.zone }}"
+    az_source_zone: "{{ item.az_zone }}"
     network_source_type: "{{ item.type }}"
   loop: "{{ subnet_classes }}"
   when: item.cidr | ansible.utils.network_in_network(rule.source_address)
@@ -24,6 +25,7 @@
 - name: Set destination_zones [2/2] - Match destination_zones from subnet list and overwrite standard destination_zones and type
   ansible.builtin.set_fact:
     destination_zone: "{{ item.zone }}"
+    az_destination_zone: "{{ item.az_zone }}"
     network_destination_type: "{{ item.type }}"
   loop: "{{ subnet_classes }}"
   when: item.cidr | ansible.utils.network_in_network(rule.destination_address)
