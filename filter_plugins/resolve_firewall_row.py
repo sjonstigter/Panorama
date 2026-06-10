@@ -41,7 +41,9 @@ def resolve_firewall_row(
     ib_network_lookup_src=None,
     ib_network_lookup_dst=None,
     source_zone=None,
+    az_source_zone=None,
     destination_zone=None,
+    az_destination_zone=None,
     device_group=None,
 ):
     resolved_rule = dict(rule)
