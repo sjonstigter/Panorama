@@ -254,11 +254,11 @@
         | list
       }}
 
-- name: Initialise resolved source tags
+- name: Initialise resolved tags list
   ansible.builtin.set_fact:
     resolved_tag: []
 
-- name: Append matching Panorama source tags
+- name: Append matching Panorama source tags by looping through source CI list
   ansible.builtin.set_fact:
     resolved_tag: >-
       {{
@@ -276,7 +276,7 @@
   loop_control:
     label: "{{ item }}"
 
-- name: Append matching Panorama destination tags
+- name: Append matching Panorama destination tags by looping through destination CI list
   ansible.builtin.set_fact:
     resolved_tag: >-
       {{
@@ -294,7 +294,7 @@
   loop_control:
     label: "{{ item }}"
 
-- name: Remove duplicate source tags
+- name: Remove duplicate tags by unique-ing our list
   ansible.builtin.set_fact:
     resolved_tag: "{{ resolved_tag | unique | list }}"
 
