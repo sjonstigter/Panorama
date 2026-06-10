@@ -254,9 +254,9 @@
         | list
       }}
 
-- name: Initialise resolved tags list
+- name: Initialise resolved tags list - starting with predefined automated tag
   ansible.builtin.set_fact:
-    resolved_tag: []
+    resolved_tag: ["sddc - automated"]
 
 - name: Append matching Panorama source tags by looping through source CI list
   ansible.builtin.set_fact:
