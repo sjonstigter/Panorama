@@ -61,7 +61,9 @@ def resolve_firewall_row(
     )
 
     resolved_rule["source_zone"] = _zone_or_default(source_zone)
+    resolved_rule["az_source_zone"] = _zone_or_default(az_source_zone)
     resolved_rule["destination_zone"] = _zone_or_default(destination_zone)
+    resolved_rule["az_destination_zone"] = _zone_or_default(az_destination_zone)
     resolved_rule["device_group"] = device_group
 
     return resolved_rule
