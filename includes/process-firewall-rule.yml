@@ -308,7 +308,7 @@
             'source_addresses': resolved_source_addresses,
             'destination_addresses': resolved_destination_addresses,
             'services': resolved_services,
-            'tags': resolved_source_tag
+            'tags': resolved_tag
           })
         ]
       }}
