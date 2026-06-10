@@ -224,6 +224,51 @@
         | list
       }}
 
+# tag object functions
+- name: Find tag based on input variable - Get tag objects from Panorama
+  paloaltonetworks.panos.panos_tag_object:
+    provider: "{{ provider }}"
+    state: gathered
+    gathered_filter: '*'
+  register: gathered_tag_objects
+
+- name: Build unique source CI list
+  ansible.builtin.set_fact:
+    source_ci_list: >-
+      {{
+        rule.sources
+        | map(attribute='ci')
+        | map('string')
+        | unique
+        | list
+      }}
+
+- name: Initialise resolved source tags
+  ansible.builtin.set_fact:
+    resolved_source_tag: []
+
+- name: Append matching Panorama source tags
+  ansible.builtin.set_fact:
+    resolved_source_tag: >-
+      {{
+        resolved_source_tag
+        +
+        (
+          gathered_tag_objects.gathered
+          | selectattr('name', 'search', item)
+          | rejectattr('name', 'match', '^0')
+          | map(attribute='name')
+          | list
+        )
+      }}
+  loop: "{{ source_ci_list }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Remove duplicate source tags
+  ansible.builtin.set_fact:
+    resolved_source_tag: "{{ resolved_source_tag | unique | list }}"
+
 - name: Add resolved values to processed firewall rule list
   ansible.builtin.set_fact:
     processed_combined_firewall_rules: >-
@@ -233,7 +278,8 @@
           rule | combine({
             'source_addresses': resolved_source_addresses,
             'destination_addresses': resolved_destination_addresses,
-            'services': resolved_services
+            'services': resolved_services,
+            'source_tags': resolved_source_tag
           })
         ]
       }}
