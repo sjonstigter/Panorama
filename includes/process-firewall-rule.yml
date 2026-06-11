@@ -7,7 +7,7 @@
     gathered_filter: "*"
   register: gathered_address_objects
 
-- name: Build requested source objects
+- name: Build requested source objects list from input variables
   ansible.builtin.set_fact:
     requested_sources: >-
       {{
@@ -16,7 +16,7 @@
         | list
       }}
 
-- name: Build list of existing Panorama address object values
+- name: Build list of existing Panorama address object values from gathered objects
   ansible.builtin.set_fact:
     existing_address_values: >-
       {{
@@ -25,7 +25,7 @@
         | list
       }}
 
-- name: Determine missing source objects
+- name: Determine missing source objects by comparing lists
   ansible.builtin.set_fact:
     missing_sources: >-
       {{
@@ -63,7 +63,7 @@
     label: "{{ item.address }}"
 
 # Destination Address function
-- name: Build requested destination objects
+- name: Build requested destination objects list from input variables
   ansible.builtin.set_fact:
     requested_destinations: >-
       {{
@@ -72,7 +72,7 @@
         | list
       }}
 
-- name: Build list of existing Panorama address object values
+- name: Build list of existing Panorama address object values from gathered objects - TODO determine if this is dupe
   ansible.builtin.set_fact:
     existing_address_values: >-
       {{
@@ -81,7 +81,7 @@
         | list
       }}
 
-- name: Determine missing destination objects
+- name: Determine missing destination objects by comparing lists
   ansible.builtin.set_fact:
     missing_destinations: >-
       {{
