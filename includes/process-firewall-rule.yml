@@ -41,35 +41,49 @@
     loop_var: source
     label: "{{ source.name | default(source.address) }}"
 
-#- name: Re-gather address objects from Panorama after source creation
-#  paloaltonetworks.panos.panos_address_object:
-#    provider: "{{ provider }}"
-#    state: gathered
-#    gathered_filter: "*"
-#  register: gathered_address_objects
+#- name: Build address value to object name map (INEFFECTIVE!!)
+#  ansible.builtin.set_fact:
+#    address_object_map: >-
+#      {{
+#        address_object_map | default({}) |
+#        combine({
+#          item.value: item.name
+#        })
+#      }}
+#  loop: "{{ gathered_address_objects.gathered }}"
+#  loop_control:
+#    label: "{{ item.name }}"
 
-- name: Build address value to object name map
+#- name: Build resolved source address object names
+#  ansible.builtin.set_fact:
+#    resolved_source_addresses: >-
+#      {{
+#        rule.sources
+#        | map(attribute='address')
+#        | map('extract', address_object_map)
+#        | list
+#      }}
+
+- name: Initialise resolved source addresses list
   ansible.builtin.set_fact:
-    address_object_map: >-
-      {{
-        address_object_map | default({}) |
-        combine({
-          item.value: item.name
-        })
-      }}
-  loop: "{{ gathered_address_objects.gathered }}"
-  loop_control:
-    label: "{{ item.name }}"
+    resolved_source_addresses: []
 
-- name: Build resolved source address object names
+- name: Find firewall object based on requested_sources addresses
   ansible.builtin.set_fact:
     resolved_source_addresses: >-
       {{
-        rule.sources
-        | map(attribute='address')
-        | map('extract', address_object_map)
-        | list
+        resolved_source_addresses
+        +
+        (
+          gathered_address_objects.gathered
+          | selectattr('value', 'equalto', item.address)
+          | map(attribute='name')
+          | list
+        )
       }}
+  loop: "{{ requested_sources }}"
+  loop_control:
+    label: "{{ item.address }}"
 
 # Destination Address function
 - name: Build requested destination objects
