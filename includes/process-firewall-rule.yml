@@ -159,11 +159,17 @@
   ansible.builtin.set_fact:
     normalised_service_destination_ports: >-
       {{
-        rule.service_destination_ports
-        | map('from_yaml')
-        | flatten
-        | map('string')
-        | list
+        (
+          rule.service_destination_ports
+          | map('from_yaml')
+          | flatten
+        )
+        if
+          rule.service_destination_ports | length > 0
+          and rule.service_destination_ports[0] is string
+          and rule.service_destination_ports[0].startswith('[')
+        else
+          rule.service_destination_ports
       }}
     normalised_service_protocol: "{{ rule.service_protocol }}"
 
