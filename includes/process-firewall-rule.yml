@@ -141,17 +141,29 @@
       }}
 
 # Service object functions
+#- name: Normalise input values for service ports
+#  ansible.builtin.set_fact:
+#    normalised_service_destination_ports: >-
+#      {{
+#        rule.service_destination_ports[0] | from_yaml
+#        if
+#          rule.service_destination_ports | length == 1
+#          and rule.service_destination_ports[0] is string
+#          and rule.service_destination_ports[0].startswith('[')
+#        else
+#          rule.service_destination_ports
+#      }}
+#    normalised_service_protocol: "{{ rule.service_protocol }}"
+
 - name: Normalise input values for service ports
   ansible.builtin.set_fact:
     normalised_service_destination_ports: >-
       {{
-        rule.service_destination_ports[0] | from_yaml
-        if
-          rule.service_destination_ports | length == 1
-          and rule.service_destination_ports[0] is string
-          and rule.service_destination_ports[0].startswith('[')
-        else
-          rule.service_destination_ports
+        rule.service_destination_ports
+        | map('from_yaml')
+        | flatten
+        | map('string')
+        | list
       }}
     normalised_service_protocol: "{{ rule.service_protocol }}"
 
