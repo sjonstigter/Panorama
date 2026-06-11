@@ -62,6 +62,10 @@
         zone: "sddc-internal"
         az_zone: "private"
         type: "internal"
+      - cidr: "145.35.0.0/16"
+        zone: "sddc-external"
+        az_zone: "private"
+        type: "external"
 
   tasks:
     - name: Resolve host IPs to Infoblox networks
