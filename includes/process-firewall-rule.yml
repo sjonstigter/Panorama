@@ -41,29 +41,6 @@
     loop_var: source
     label: "{{ source.name | default(source.address) }}"
 
-#- name: Build address value to object name map (INEFFECTIVE!!)
-#  ansible.builtin.set_fact:
-#    address_object_map: >-
-#      {{
-#        address_object_map | default({}) |
-#        combine({
-#          item.value: item.name
-#        })
-#      }}
-#  loop: "{{ gathered_address_objects.gathered }}"
-#  loop_control:
-#    label: "{{ item.name }}"
-
-#- name: Build resolved source address object names
-#  ansible.builtin.set_fact:
-#    resolved_source_addresses: >-
-#      {{
-#        rule.sources
-#        | map(attribute='address')
-#        | map('extract', address_object_map)
-#        | list
-#      }}
-
 - name: Initialise resolved source addresses list
   ansible.builtin.set_fact:
     resolved_source_addresses: []
@@ -120,55 +97,28 @@
     loop_var: destination
     label: "{{ destination.name | default(destination.address) }}"
 
-#- name: Re-gather address objects from Panorama after destination creation
-#  paloaltonetworks.panos.panos_address_object:
-#    provider: "{{ provider }}"
-#    state: gathered
-#    gathered_filter: "*"
-#  register: gathered_address_objects
-
-- name: Reset address value to object name map
+- name: Initialise resolved destination addresses list
   ansible.builtin.set_fact:
-    address_object_map: {}
+    resolved_destination_addresses: []
 
-- name: Build address value to object name map
-  ansible.builtin.set_fact:
-    address_object_map: >-
-      {{
-        address_object_map | default({}) |
-        combine({
-          item.value: item.name
-        })
-      }}
-  loop: "{{ gathered_address_objects.gathered }}"
-  loop_control:
-    label: "{{ item.name }}"
-
-- name: Build resolved destination address object names
+- name: Find firewall object based on requested_destinations addresses
   ansible.builtin.set_fact:
     resolved_destination_addresses: >-
       {{
-        rule.destinations
-        | map(attribute='address')
-        | map('extract', address_object_map)
-        | list
+        resolved_destination_addresses
+        +
+        (
+          gathered_address_objects.gathered
+          | selectattr('value', 'equalto', item.address)
+          | map(attribute='name')
+          | list
+        )
       }}
+  loop: "{{ requested_destinations }}"
+  loop_control:
+    label: "{{ item.address }}"
 
 # Service object functions
-#- name: Normalise input values for service ports
-#  ansible.builtin.set_fact:
-#    normalised_service_destination_ports: >-
-#      {{
-#        rule.service_destination_ports[0] | from_yaml
-#        if
-#          rule.service_destination_ports | length == 1
-#          and rule.service_destination_ports[0] is string
-#          and rule.service_destination_ports[0].startswith('[')
-#        else
-#          rule.service_destination_ports
-#      }}
-#    normalised_service_protocol: "{{ rule.service_protocol }}"
-
 - name: Normalise input values for service ports
   ansible.builtin.set_fact:
     normalised_service_destination_ports: >-
@@ -222,13 +172,6 @@
     label: "{{ normalised_service_protocol }}-{{ port }}"
   vars:
     service_protocol: "{{ normalised_service_protocol }}"
-
-#- name: Re-gather service objects from Panorama after service creation
-#  paloaltonetworks.panos.panos_service_object:
-#    provider: "{{ provider }}"
-#    state: gathered
-#    gathered_filter: "*"
-#  register: gathered_service_objects
 
 - name: Build service port to first service object name map
   ansible.builtin.set_fact:
