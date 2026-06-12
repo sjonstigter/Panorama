@@ -1,0 +1,42 @@
+---
+- name: Firewall serial number list
+  ansible.builtin.set_fact:
+    firewall_list:
+      - device_group: "SG-Internal"
+        serial: "013201003821"
+      - device_group: "SG-External"
+        serial: "013201025327"
+      - device_group: "SDDC Azure"
+        serial: "00795700713496"
+
+- name: Build device group to firewall serial map
+  ansible.builtin.set_fact:
+    firewall_serial_map: "{{ firewall_list | items2dict(key_name='device_group', value_name='serial') }}"
+
+- name: Run panos match to check rules directly on firewall specified by device_group serial lookup
+  paloaltonetworks.panos.panos_match_rule:
+    provider:
+      ip_address: "{{ inventory_hostname }}"
+      username: "{{ panorama_username }}"
+      password: "{{ panorama_password }}"
+      serial_number: "{{ firewall_serial_map[item.0.device_group[0]] }}"
+    source_ip: "{{ item.0.source_address }}"
+    destination_ip: "{{ item.0.destination_address }}"
+    destination_port: "{{ item.1 }}"
+    protocol: "{{ '6' if item.0.service_protocol | lower == 'tcp' else '17' }}"
+  register: matched_rules
+  loop: "{{ firewall_rules | subelements('service_destination_port') }}"
+  loop_control:
+    label: >-
+      row {{ item.0.row }}:
+      {{ item.0.source_address }} -> {{ item.0.destination_address }}:{{ item.1 }}/{{ item.0.service_protocol }}
+
+- name: Show matched rules
+  ansible.builtin.debug:
+    msg: >-
+      Row {{ item.item.0.row }}
+      port {{ item.item.1 }}
+      matched rule: {{ item.rule | default('NO MATCH') }}
+  loop: "{{ matched_rules.results }}"
+  loop_control:
+    label: "row {{ item.item.0.row }} port {{ item.item.1 }}"
