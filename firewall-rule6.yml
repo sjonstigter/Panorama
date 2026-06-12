@@ -79,6 +79,10 @@
     - name: Check if requested access already exists
       ansible.builtin.include_tasks: includes/check-security-rules.yml
       when: validate_rule_access
+      loop: "{{ firewall_rules_resolved }}"
+      loop_control:
+        loop_var: rule
+        label: "row {{ rule.row }}"
 
     - name: Build combined firewall rules using custom filter
       ansible.builtin.set_fact:

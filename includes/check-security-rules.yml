@@ -19,24 +19,25 @@
       ip_address: "{{ inventory_hostname }}"
       username: "{{ panorama_username }}"
       password: "{{ panorama_password }}"
-      serial_number: "{{ firewall_serial_map[item.0.device_group[0]] }}"
-    source_ip: "{{ item.0.source_address }}"
-    destination_ip: "{{ item.0.destination_address }}"
-    destination_port: "{{ item.1 }}"
-    protocol: "{{ '6' if item.0.service_protocol | lower == 'tcp' else '17' }}"
+      serial_number: "{{ firewall_serial_map[rule.device_group[0]] }}"
+    source_ip: "{{ rule.source_address }}"
+    destination_ip: "{{ rule.destination_address }}"
+    destination_port: "{{ port }}"
+    protocol: "{{ '6' if rule.service_protocol | lower == 'tcp' else '17' }}"
   register: matched_rules
-  loop: "{{ firewall_rules | subelements('service_destination_port') }}"
+  loop: "{{ rule.service_destination_port }}"
   loop_control:
+    loop_var: port
     label: >-
-      row {{ item.0.row }}:
-      {{ item.0.source_address }} -> {{ item.0.destination_address }}:{{ item.1 }}/{{ item.0.service_protocol }}
+      row {{ rule.row }}:
+      {{ rule.source_address }} -> {{ rule.destination_address }}:{{ port }}/{{ rule.service_protocol }}
 
 - name: Show matched rules
   ansible.builtin.debug:
     msg: >-
-      Row {{ item.item.0.row }}
-      port {{ item.item.1 }}
+      Row {{ rule.row }}
+      port {{ item.item }}
       matched rule: {{ item.rule | default('NO MATCH') }}
   loop: "{{ matched_rules.results }}"
   loop_control:
-    label: "row {{ item.item.0.row }} port {{ item.item.1 }}"
+    label: "row {{ rule.row }} port {{ item.item }}"
