@@ -64,17 +64,17 @@
     device_group: >-
       {%- set pair = [network_source_type, network_destination_type] | sort -%}
       {%- if pair == ['external', 'internal'] -%}
-      ['ss-external']
+      ['SG-External']
       {%- elif pair == ['internal', 'internal'] -%}
-      ['ss-internal']
+      ['SG-Internal']
       {%- elif pair == ['azure', 'internal'] -%}
-      ['ss-external', 'ss-azure']
+      ['SG-External', 'SDDC Azure']
       {%- elif pair == ['azure', 'azure'] -%}
-      ['ss-azure']
+      ['SDDC Azure']
       {%- elif pair == ['external', 'azure'] -%}
-      ['ss-azure']
+      ['SDDC Azure']
       {%- else -%}
-      ['ss-external']
+      ['SG-External']
       {%- endif -%}
 
 - name: Add resolved row to firewall_rules_resolved using Python filter plugin
