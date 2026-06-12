@@ -74,7 +74,7 @@
       {%- elif pair == ['external', 'azure'] -%}
       ['ss-azure']
       {%- else -%}
-      ['ERR-DG-NOT-FOUND-OR-INVALID']
+      ['ss-external']
       {%- endif -%}
 
 - name: Add resolved row to firewall_rules_resolved using Python filter plugin
