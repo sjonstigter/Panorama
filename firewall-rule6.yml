@@ -68,6 +68,30 @@
         type: "external"
 
   tasks:
+    - name: Check if requested access already exists
+      paloaltonetworks.panos.panos_match_rule:
+        provider: "{{ provider }}"
+        source_ip: "{{ item.0.source_address }}"
+        destination_ip: "{{ item.0.destination_address }}"
+        destination_port: "{{ item.1 }}"
+        protocol: "{{ '6' if item.0.service_protocol | lower == 'tcp' else '17' }}"
+      register: matched_rules
+      loop: "{{ firewall_rules | subelements('service_destination_port') }}"
+      loop_control:
+        label: >-
+          row {{ item.0.row }}:
+          {{ item.0.source_address }} -> {{ item.0.destination_address }}:{{ item.1 }}/{{ item.0.service_protocol }}
+
+    - name: Show matched rules
+      ansible.builtin.debug:
+        msg: >-
+          Row {{ item.item.0.row }}
+          port {{ item.item.1 }}
+          matched rule: {{ item.rule | default('NO MATCH') }}
+      loop: "{{ matched_rules.results }}"
+      loop_control:
+        label: "row {{ item.item.0.row }} port {{ item.item.1 }}"
+
     - name: Resolve host IPs to Infoblox networks
       ansible.builtin.include_tasks: includes/resolve-firewall-row.yml
       loop: "{{ firewall_rules }}"
