@@ -9,6 +9,13 @@
       - device_group: "SDDC Azure"
         serial: "00795700713496"
 
+- name: Set protocol map
+  ansible.builtin.set_fact:
+    protocol_map:
+      icmp: "1"
+      tcp: "6"
+      udp: "17"
+
 - name: Build device group to firewall serial map
   ansible.builtin.set_fact:
     firewall_serial_map: "{{ firewall_list | items2dict(key_name='device_group', value_name='serial') }}"
@@ -23,7 +30,7 @@
     source_ip: "{{ rule.source_address }}"
     destination_ip: "{{ rule.destination_address }}"
     destination_port: "{{ port }}"
-    protocol: "{{ '6' if rule.service_protocol | lower == 'tcp' else '17' }}"
+    protocol: "{{ protocol_map[rule.service_protocol | lower] }}"
   register: matched_rules
   loop: "{{ rule.service_destination_port }}"
   loop_control:
