@@ -18,7 +18,7 @@
     validate_rule_access: false
 
     provider:
-      ip_address: "{{ inventory_hostname }}"
+      ip_address: "{{ panorama_address }}"
       username: "{{ panorama_username }}"
       password: "{{ panorama_password }}"
 
