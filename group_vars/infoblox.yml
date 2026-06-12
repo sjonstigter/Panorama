@@ -1,4 +1,5 @@
 ---
+infoblox_address: infoblox.zero-days.nl
 infoblox_username: admin
 infoblox_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256

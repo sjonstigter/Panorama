@@ -4,8 +4,8 @@
   connection: local
   gather_facts: false
 
-  vars_files:
-    - vault/vault-fwrules.yml
+  #vars_files:
+  #  - vault/vault-fwrules.yml
 
   vars:
     firewall_combine_mode: "{{ combine | default('port') }}"
