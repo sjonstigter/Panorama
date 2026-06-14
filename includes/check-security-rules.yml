@@ -38,13 +38,6 @@
           tcp: "6"
           udp: "17"
 
-    - name: Determine if source and destination IPs are host or network
-      ansible.builtin.set_fact:
-        source_is_host: "{{ '/' not in rule.source_address or rule.source_address.endswith('/32') }}"
-        source_is_network: "{{ '/' in rule.source_address and not rule.source_address.endswith('/32') }}"
-        destination_is_host: "{{ '/' not in rule.destination_address or rule.destination_address.endswith('/32') }}"
-        destination_is_network: "{{ '/' in rule.destination_address and not rule.destination_address.endswith('/32') }}"
-
     - name: Convert source subnet to a host address inside the range for rule validation
       ansible.builtin.set_fact:
         source_is_host: true
