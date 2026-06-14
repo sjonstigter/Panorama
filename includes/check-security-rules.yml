@@ -6,6 +6,13 @@
       SG-External: "013201025327"
       SDDC Azure: "00795700713496"
 
+- name: Firewall ip number list to run policy-checker against
+  ansible.builtin.set_fact:
+    firewall_list_ip:
+      SG-Internal: "192.168.7.230"
+      SG-External: "192.168.7.230"
+      SDDC Azure: "192.168.7.230"
+
 - name: Protocol list
   ansible.builtin.set_fact:
     protocol_list:
@@ -16,10 +23,10 @@
 - name: Run panos match to check rules directly on firewall specified by device_group serial lookup
   paloaltonetworks.panos.panos_match_rule:
     provider:
-      ip_address: "{{ panorama_address }}"
+      ip_address: "{{ firewall_list_ip[rule.device_group[0]] }}"
       username: "{{ panorama_username }}"
       password: "{{ panorama_password }}"
-      serial_number: "{{ firewall_list[rule.device_group[0]] }}"
+      #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
     source_ip: "{{ rule.source_address }}"
     destination_ip: "{{ rule.destination_address }}"
     destination_port: "{{ port }}"
