@@ -7,7 +7,6 @@ def combine_firewall_rules(rules, combine_mode="port"):
 
 #    for rule in rules:
         key_parts = [
-            rule.get("description"),
             rule.get("source_zone"),
             rule.get("destination_zone"),
             rule.get("service_protocol", "").lower(),
