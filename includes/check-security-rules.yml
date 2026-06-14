@@ -1,66 +1,88 @@
 ---
-- name: Firewall serial number list to run policy-checker against
+- name: Determine if service destination port is valid
   ansible.builtin.set_fact:
-    firewall_list:
-      SG-Internal: "013201003821"
-      SG-External: "013201025327"
-      SDDC Azure: "00795700713496"
+    valid_service_destination_port: >-
+      {{
+        rule.service_destination_port is sequence
+        and rule.service_destination_port is not string
+        and rule.service_destination_port | length == 1
+        and rule.service_destination_port[0] is string
+        and rule.service_destination_port[0] is match('^[0-9]+$')
+        and rule.service_destination_port[0] | int >= 1
+        and rule.service_destination_port[0] | int <= 65535
+      }}
 
-- name: Firewall ip number list to run policy-checker against
-  ansible.builtin.set_fact:
-    firewall_list_ip:
-      SG-Internal: "192.168.7.230"
-      SG-External: "192.168.7.230"
-      SDDC Azure: "192.168.7.230"
-
-- name: Protocol list
-  ansible.builtin.set_fact:
-    protocol_list:
-      icmp: "1"
-      tcp: "6"
-      udp: "17"
-
-- name: Determine if source and destination IPs are host or network
-  ansible.builtin.set_fact:
-    source_is_host: "{{ '/' not in rule.source_address or rule.source_address.endswith('/32') }}"
-    source_is_network: "{{ '/' in rule.source_address and not rule.source_address.endswith('/32') }}"
-    destination_is_host: "{{ '/' not in rule.destination_address or rule.destination_address.endswith('/32') }}"
-    destination_is_network: "{{ '/' in rule.destination_address and not rule.destination_address.endswith('/32') }}"
-
-- name: Convert source EPG subnet to gateway address for rule validation
-  ansible.builtin.set_fact:
-    pol_source_address: "{{ rule.source_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
+- name: Determine if access already exisits by running Palo Alto policy checker
   when:
-    - source_is_network | bool
-    - rule.network_source_type == "internal"
+    - valid_service_destination_port | bool
+  block:
 
-- name: Convert destination EPG subnet to gateway address for rule validation
-  ansible.builtin.set_fact:
-    pol_destination_address: "{{ rule.destination_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
-  when:
-    - destination_is_network | bool
-    - rule.network_destination_type == "internal"
+    - name: Firewall serial number list to run policy-checker against
+      ansible.builtin.set_fact:
+        firewall_list:
+          SG-Internal: "013201003821"
+          SG-External: "013201025327"
+          SDDC Azure: "00795700713496"
 
-- name: Run panos match to check rules directly on firewall specified by device_group serial lookup
-  paloaltonetworks.panos.panos_match_rule:
-    provider:
-      ip_address: "{{ firewall_list_ip[rule.device_group[0]] }}"
-      username: "{{ panorama_username }}"
-      password: "{{ panorama_password }}"
-      #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
-    source_ip: "{{ pol_source_address | default(rule.source_address, true) }}"
-    destination_ip: "{{ pol_destination_address | default(rule.destination_address, true) }}"
-    destination_port: "{{ rule.service_destination_port[0] }}"
-    protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
-  register: result
-  when:
-    - rule.network_source_type == "internal"
+    - name: Firewall ip number list to run policy-checker against
+      ansible.builtin.set_fact:
+        firewall_list_ip:
+          SG-Internal: "192.168.7.230"
+          SG-External: "192.168.7.230"
+          SDDC Azure: "192.168.7.230"
 
-- name: Show matched rule
-  ansible.builtin.debug:
-    msg: >-
-      message: {{ result.msg | default('Rule not matched') }}
-      matched rule: {{ result.rule.name | default('Rule not matched') }}
+    - name: Protocol list
+      ansible.builtin.set_fact:
+        protocol_list:
+          icmp: "1"
+          tcp: "6"
+          udp: "17"
+
+    - name: Determine if source and destination IPs are host or network
+      ansible.builtin.set_fact:
+        source_is_host: "{{ '/' not in rule.source_address or rule.source_address.endswith('/32') }}"
+        source_is_network: "{{ '/' in rule.source_address and not rule.source_address.endswith('/32') }}"
+        destination_is_host: "{{ '/' not in rule.destination_address or rule.destination_address.endswith('/32') }}"
+        destination_is_network: "{{ '/' in rule.destination_address and not rule.destination_address.endswith('/32') }}"
+
+    - name: Convert source subnet to a host address inside the range for rule validation
+      ansible.builtin.set_fact:
+        source_is_host: true
+        pol_source_address: "{{ rule.source_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
+      when:
+        - source_is_network | bool
+        - rule.network_source_type == "internal"
+
+    - name: Convert destination subnet to a host address inside the range for rule validation
+      ansible.builtin.set_fact:
+        destination_is_host: true
+        pol_destination_address: "{{ rule.destination_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
+      when:
+        - destination_is_network | bool
+        - rule.network_destination_type == "internal"
+
+    - name: Run panos match to check rules directly on firewall specified by device_group serial lookup
+      paloaltonetworks.panos.panos_match_rule:
+        provider:
+          ip_address: "{{ firewall_list_ip[rule.device_group[0]] }}"
+          username: "{{ panorama_username }}"
+          password: "{{ panorama_password }}"
+          #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
+        source_ip: "{{ pol_source_address | default(rule.source_address, true) }}"
+        destination_ip: "{{ pol_destination_address | default(rule.destination_address, true) }}"
+        destination_port: "{{ rule.service_destination_port[0] }}"
+        protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
+      register: result
+      when:
+        # Policy checker only accepts hosts so make sure we do not parse any network ranges or it will cause a fail
+        - source_is_host | bool
+        - destination_is_host | bool
+
+    - name: Show matched rule
+      ansible.builtin.debug:
+        msg: >-
+          message: {{ result.msg | default('Rule not matched') }}
+          matched rule: {{ result.rule.name | default('Rule not matched') }}
 
 #- name: Add resolved rules to firewall_rules_resolved
 #  ansible.builtin.set_fact:
