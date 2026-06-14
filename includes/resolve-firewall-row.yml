@@ -73,6 +73,10 @@
       ['SDDC Azure']{%- else -%}
       ['ERR-DG-NOT-FOUND-OR-INVALID']{%- endif -%}
 
+- name: Check if requested access already exists
+  ansible.builtin.include_tasks: includes/check-security-rules.yml
+  when: validate_rule_access
+
 - name: Add resolved row to firewall_rules_resolved
   ansible.builtin.set_fact:
     firewall_rules_resolved: >-
@@ -88,7 +92,9 @@
             'destination_zone': resolved_destination_zone,
             'az_destination_zone': resolved_az_destination_zone,
             'network_destination_type': network_destination_type,
-            'device_group': device_group
+            'device_group': device_group,
+            'rule_match': result.msg | default('Rule not matched'),
+            'rule_match_name': result.rule.name | default('Rule not matched')
           })
         ]
       }}
