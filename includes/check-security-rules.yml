@@ -20,18 +20,34 @@
       tcp: "6"
       udp: "17"
 
-- name: Run panos match to check rules directly on firewall specified by device_group serial lookup
-  paloaltonetworks.panos.panos_match_rule:
-    provider:
-      ip_address: "{{ firewall_list_ip[rule.device_group[0]] }}"
-      username: "{{ panorama_username }}"
-      password: "{{ panorama_password }}"
-      #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
-    source_ip: "{{ rule.source_address }}"
-    destination_ip: "{{ rule.destination_address }}"
-    destination_port: "{{ port }}"
-    protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
-  register: matched_rules
+- name: Policy check block
+  block:
+
+    - name: Convert source EPG subnet to gateway address for rule validation
+      ansible.builtin.set_fact:
+        pol_source_address: "{{ rule.source_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
+      when:
+        - rule.network_source_type == "azure"
+
+    - name: Convert destination EPG subnet to gateway address for rule validation
+      ansible.builtin.set_fact:
+        pol_destination_address: "{{ rule.destination_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
+      when:
+        - rule.network_destination_type == "internal"
+
+    - name: Run panos match to check rules directly on firewall specified by device_group serial lookup
+      paloaltonetworks.panos.panos_match_rule:
+        provider:
+          ip_address: "{{ firewall_list_ip[rule.device_group[0]] }}"
+          username: "{{ panorama_username }}"
+          password: "{{ panorama_password }}"
+          #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
+        source_ip: "{{ pol_source_address }}"
+        destination_ip: "{{ pol_destination_address }}"
+        destination_port: "{{ port }}"
+        protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
+      register: matched_rules
+
   loop: "{{ rule.service_destination_port }}"
   loop_control:
     loop_var: port
