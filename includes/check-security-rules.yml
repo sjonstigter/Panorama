@@ -20,16 +20,25 @@
       tcp: "6"
       udp: "17"
 
+- name: Determine if source and destination IPs are host or network
+  ansible.builtin.set_fact:
+    source_is_host: "{{ '/' not in rule.source_address or rule.source_address.endswith('/32') }}"
+    source_is_network: "{{ '/' in rule.source_address and not rule.source_address.endswith('/32') }}"
+    destination_is_host: "{{ '/' not in rule.destination_address or rule.destination_address.endswith('/32') }}"
+    destination_is_network: "{{ '/' in rule.destination_address and not rule.destination_address.endswith('/32') }}"
+
 - name: Convert source EPG subnet to gateway address for rule validation
   ansible.builtin.set_fact:
     pol_source_address: "{{ rule.source_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
   when:
+    - source_is_network | bool
     - rule.network_source_type == "internal"
 
 - name: Convert destination EPG subnet to gateway address for rule validation
   ansible.builtin.set_fact:
     pol_destination_address: "{{ rule.destination_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
   when:
+    - destination_is_network | bool
     - rule.network_destination_type == "internal"
 
 - name: Run panos match to check rules directly on firewall specified by device_group serial lookup
@@ -39,8 +48,8 @@
       username: "{{ panorama_username }}"
       password: "{{ panorama_password }}"
       #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
-    source_ip: "{{ pol_source_address }}"
-    destination_ip: "{{ rule.destination_address }}"
+    source_ip: "{{ pol_source_address | default(rule.source_address, true) }}"
+    destination_ip: "{{ pol_destination_address | default(rule.destination_address, true) }}"
     destination_port: "{{ rule.service_destination_port[0] }}"
     protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
   register: result
