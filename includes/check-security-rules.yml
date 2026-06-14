@@ -53,15 +53,15 @@
       message: {{ result.msg | default('Rule not matched') }}
       matched rule: {{ result.rule.name | default('Rule not matched') }}
 
-- name: Add resolved rules to firewall_rules_resolved
-  ansible.builtin.set_fact:
-    firewall_rules_resolved: >-
-      {{
-        firewall_rules_resolved | default([]) +
-        [
-          rule | combine({
-            'rule_match': result.msg | default('Rule not matched'),
-            'rule_match_name': result.rule.name | default('Rule not matched')
-          })
-        ]
-      }}
+#- name: Add resolved rules to firewall_rules_resolved
+#  ansible.builtin.set_fact:
+#    firewall_rules_resolved: >-
+#      {{
+#        firewall_rules_resolved | default([]) +
+#        [
+#          rule | combine({
+#            'rule_match': result.msg | default('Rule not matched'),
+#            'rule_match_name': result.rule.name | default('Rule not matched')
+#          })
+#        ]
+#      }}
