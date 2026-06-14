@@ -57,7 +57,7 @@
     - name: Run panos match to check rules directly on firewall specified by device_group serial lookup
       paloaltonetworks.panos.panos_match_rule:
         provider:
-          ip_address: "{{ firewall_list_ip[rule.device_group[0]] }}"
+          ip_address: "{{ firewall_list_ip[device_group[0]] }}"
           username: "{{ panorama_username }}"
           password: "{{ panorama_password }}"
           #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
