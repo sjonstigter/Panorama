@@ -49,4 +49,4 @@
 - name: Show matched rule
   ansible.builtin.debug:
     msg: >-
-      matched rule: {{ result.rule | default('NO MATCH') }}
+      matched rule: {{ result.rule.name | default('NO MATCH') }}
