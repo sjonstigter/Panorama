@@ -44,7 +44,7 @@
         pol_source_address: "{{ rule.source_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
       when:
         - source_is_network | bool
-        - rule.network_source_type == "internal"
+        - network_source_type == "internal"
 
     - name: Convert destination subnet to a host address inside the range for rule validation
       ansible.builtin.set_fact:
@@ -52,7 +52,7 @@
         pol_destination_address: "{{ rule.destination_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
       when:
         - destination_is_network | bool
-        - rule.network_destination_type == "internal"
+        - network_destination_type == "internal"
 
     - name: Run panos match to check rules directly on firewall specified by device_group serial lookup
       paloaltonetworks.panos.panos_match_rule:
