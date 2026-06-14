@@ -43,10 +43,12 @@
     destination_ip: "{{ rule.destination_address }}"
     destination_port: "{{ rule.service_destination_port[0] }}"
     protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
+  register: result
   when:
     - rule.network_source_type == "internal"
 
 - name: Show matched rule
   ansible.builtin.debug:
     msg: >-
-      matched rule: {{ result.rule.name | default('NO MATCH') }}
+      message: {{ result.msg | default('Rule not matched') }}
+      matched rule: {{ result.rule.name | default('Rule not matched') }}
