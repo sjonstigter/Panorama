@@ -53,6 +53,8 @@ def combine_firewall_rules(rules, combine_mode="port"):
                 "source_task": rule.get("source_task"),
                 "destination_task": rule.get("destination_task"),
                 "device_group": rule.get("device_group"),
+                "rule_match": rule.get("rule_match"),
+                "rule_match_name": rule.get("rule_match_name"),
                 "applications": [],
                 "service_destination_ports": [],
                 "rows": [],
