@@ -74,8 +74,8 @@
     - name: Show matched rule
       ansible.builtin.debug:
         msg: >-
-          message: {{ (result.msg | default('Rule not matched')).split(';')[0] }}
-          matched rule: {{ result.rule.name | default('Rule not matched') }}
+          message: {{ (result.msg | default('No rule lookup performed')).split(';')[0] }}
+          matched rule: {{ result.rule.name | default(none) }}
 
 #- name: Add resolved rules to firewall_rules_resolved
 #  ansible.builtin.set_fact:
