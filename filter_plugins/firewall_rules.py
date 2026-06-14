@@ -5,7 +5,7 @@ def combine_firewall_rules(rules, combine_mode="port"):
         if str(rule.get("rule_match", "")).strip().lower() == "rule matched":
             continue
 
-    for rule in rules:
+#    for rule in rules:
         key_parts = [
             rule.get("description"),
             rule.get("source_zone"),
