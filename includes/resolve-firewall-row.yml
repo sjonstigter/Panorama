@@ -93,7 +93,7 @@
             'az_destination_zone': resolved_az_destination_zone,
             'network_destination_type': network_destination_type,
             'device_group': device_group,
-            'rule_match': result.msg | default('Rule not matched'),
+            'rule_match': (result.msg | default('Rule not matched')).split(';')[0],
             'rule_match_name': result.rule.name | default('Rule not matched')
           })
         ]
