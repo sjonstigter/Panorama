@@ -10,7 +10,6 @@ def combine_firewall_rules(rules, combine_mode="port"):
             rule.get("source_zone"),
             rule.get("destination_zone"),
             rule.get("service_protocol", "").lower(),
-            rule.get("group_id"),
             rule.get("action", "").lower(),
             rule.get("persistent"),
             rule.get("source_task"),
