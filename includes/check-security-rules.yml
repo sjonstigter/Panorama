@@ -43,21 +43,8 @@
     destination_ip: "{{ rule.destination_address }}"
     destination_port: "{{ rule.service_destination_port[0] }}"
     protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
-  register: matched_rules
 
-#  loop: "{{ rule.service_destination_port }}"
-#  loop_control:
-#    loop_var: port
-#    label: >-
-#      row {{ rule.row }}:
-#      {{ rule.source_address }} -> {{ rule.destination_address }}:{{ port }}/{{ rule.service_protocol }}
-
-- name: Show matched rules
+- name: Show matched rule
   ansible.builtin.debug:
     msg: >-
-      Row {{ rule.row }}
-      port {{ item.item }}
-      matched rule: {{ item.rule | default('NO MATCH') }}
-  loop: "{{ matched_rules.results }}"
-  loop_control:
-    label: "row {{ rule.row }} port {{ item.item }}"
+      matched rule: {{ result.rule | default('NO MATCH') }}
