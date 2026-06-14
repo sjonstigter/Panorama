@@ -84,8 +84,10 @@
             'destination_address': resolved_destination_address,
             'source_zone': resolved_source_zone,
             'az_source_zone': resolved_az_source_zone,
+            'network_source_type': network_source_type,
             'destination_zone': resolved_destination_zone,
             'az_destination_zone': resolved_az_destination_zone,
+            'network_destination_type': network_destination_type,
             'device_group': device_group
           })
         ]
