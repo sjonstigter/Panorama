@@ -40,7 +40,7 @@
       password: "{{ panorama_password }}"
       #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
     source_ip: "{{ pol_source_address }}"
-    destination_ip: "{{ pol_destination_address }}"
+    destination_ip: "{{ rule.destination_address }}"
     destination_port: "{{ rule.port }}"
     protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
   register: matched_rules
