@@ -24,7 +24,7 @@
   ansible.builtin.set_fact:
     pol_source_address: "{{ rule.source_address | ansible.utils.ipaddr('net') | ansible.utils.ipaddr('-2') | ansible.utils.ipaddr('address') }}"
   when:
-    - rule.network_source_type == "azure"
+    - rule.network_source_type == "internal"
 
 - name: Convert destination EPG subnet to gateway address for rule validation
   ansible.builtin.set_fact:
@@ -43,6 +43,8 @@
     destination_ip: "{{ rule.destination_address }}"
     destination_port: "{{ rule.service_destination_port[0] }}"
     protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
+  when:
+    - rule.network_source_type == "internal"
 
 - name: Show matched rule
   ansible.builtin.debug:
