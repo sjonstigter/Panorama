@@ -112,6 +112,7 @@
           | selectattr('value', 'equalto', item.address)
           | map(attribute='name')
           | list
+          | first
         )
       }}
   loop: "{{ requested_destinations }}"
@@ -153,6 +154,7 @@
         | map(attribute='destination_port')
         | map('string')
         | list
+        | first
       }}
 
 - name: Determine missing ports - compare service destination ports to existing ports
@@ -215,6 +217,7 @@
           | selectattr('destination_port', 'equalto', item | string)
           | map(attribute='name')
           | list
+          | first
         )
       }}
   loop: "{{ normalised_service_destination_ports }}"
