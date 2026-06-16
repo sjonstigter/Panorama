@@ -51,12 +51,14 @@
       {{
         resolved_source_addresses
         +
-        (
-          gathered_address_objects.gathered
-          | selectattr('value', 'equalto', item.address)
-          | map(attribute='name')
-          | list
-        )
+        [
+          (
+            gathered_address_objects.gathered
+            | selectattr('value', 'equalto', item.address)
+            | map(attribute='name')
+            | list
+          )
+        ]
       }}
   loop: "{{ requested_sources }}"
   loop_control:
@@ -107,13 +109,15 @@
       {{
         resolved_destination_addresses
         +
-        (
-          gathered_address_objects.gathered
-          | selectattr('value', 'equalto', item.address)
-          | map(attribute='name')
-          | list
-          | first
-        )
+        [
+          (
+            gathered_address_objects.gathered
+            | selectattr('value', 'equalto', item.address)
+            | map(attribute='name')
+            | list
+            | first
+          )
+        ]
       }}
   loop: "{{ requested_destinations }}"
   loop_control:
@@ -154,7 +158,6 @@
         | map(attribute='destination_port')
         | map('string')
         | list
-        | first
       }}
 
 - name: Determine missing ports - compare service destination ports to existing ports
