@@ -17,3 +17,8 @@
       loop_control:
         loop_var: rule
         label: "{{ rule.description }}"
+
+    - name: Set stat processed_combined_firewall_rules
+      ansible.builtin.set_stats:
+        data:
+          processed_combined_firewall_rules: "{{ processed_combined_firewall_rules }}"
