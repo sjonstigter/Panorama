@@ -134,6 +134,6 @@
         provider: "{{ provider }}"
         admins: ['{{ provider.username }}']
         style: "device group"
-        name: "SDDC Proxy"
+        name: "{{ device_group }}"
         description: "Push from Ansible orchestrator"
       when: push | default(false)
