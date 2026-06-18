@@ -1,4 +1,11 @@
 ---
+- name: Set security group_profile lookup list
+  ansible.builtin.set_fact:
+    security_group_profile_list:
+      SG-Internal: "sddc-strict-internal"
+      SG-External: "sddc-strict-edge-bp"
+      SDDC Azure: "sddc-strict-internal"
+
 - name: Get all security rules from the device
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
@@ -66,14 +73,14 @@
     destination_zone: "{{ rule.destination_zone }}"
     destination_ip: "{{ rule.destination_addresses }}"
     service: "{{ rule.services }}"
-    action: 'allow'
-    #group_profile: "sddc-strict-proxy-bp"
+    action: "{{ action }}"
+    group_profile: "{{ security_group_profile_list[device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     action: 'allow'
   when: (last_rule_name | default('') | string | trim | length) == 0
 
-- name: Create proxy security rule (place after rule {{ last_rule_name }})
+- name: Create security rule (place after rule {{ last_rule_name }})
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
     device_group: "{{ rule.device_group[0] }}"
@@ -86,8 +93,8 @@
     destination_zone: "{{ rule.destination_zone }}"
     destination_ip: "{{ rule.destination_addresses }}"
     service: "{{ rule.services }}"
-    action: 'allow'
-    #group_profile: "sddc-strict-proxy-bp"
+    action: "{{ action }}"
+    group_profile: "{{ security_group_profile_list[device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     location: 'after'
