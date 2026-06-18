@@ -2,7 +2,7 @@
 - name: Get all security rules from the device
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group }}"
+    device_group: "{{ rule.device_group[0] }}"
     state: 'gathered'
     gathered_filter: '*'
   register: security_rules
