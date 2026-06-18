@@ -74,7 +74,7 @@
     destination_ip: "{{ rule.destination_addresses }}"
     service: "{{ rule.services }}"
     action: "{{ rule.action }}"
-    group_profile: "{{ security_group_profile_list[device_group[0]] }}"
+    group_profile: "{{ security_group_profile_list[rule.device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     action: 'allow'
@@ -94,7 +94,7 @@
     destination_ip: "{{ rule.destination_addresses }}"
     service: "{{ rule.services }}"
     action: "{{ rule.action }}"
-    group_profile: "{{ security_group_profile_list[device_group[0]] }}"
+    group_profile: "{{ security_group_profile_list[rule.device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     location: 'after'
