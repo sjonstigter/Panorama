@@ -1,47 +1,35 @@
 ---
-- name: Palo Alto create security rule
-  hosts: "panorama"
-  connection: local
-  gather_facts: false
+- name: Get all security rules from the device
+  paloaltonetworks.panos.panos_security_rule:
+    provider: "{{ provider }}"
+    device_group: "{{ rule.device_group }}"
+    state: 'gathered'
+    gathered_filter: '*'
+  register: security_rules
 
-  vars:
-    perform_commit: true # set to false if you do not want the playbook to perform actual Panorama commits
-    debug: false # set to true to show extra debug information
-    lookup_tags: true # set to true to attempt policy rule tag lookup - EXPERIMENTAL
-    explicit_rule_placement: true # set to true to attempt placing new rules in explicit order (requires lookup_tags to be true) - EXPERIMENTAL
-    provider:
-      ip_address: "{{ inventory_hostname }}"
-      username: '{{ lookup("env", "ANSIBLE_NET_USERNAME") }}'
-      password: '{{ lookup("env", "ANSIBLE_NET_PASSWORD") }}'
+- name: Find tag based on input variable
+  when: lookup_tags
+  block:
 
-  tasks:
-    - name: Find tag based on input variable
-      when: lookup_tags
-      block:
+    - name: Find tag based on input variable - Get our application name from the EPG name
+      ansible.builtin.set_fact:
+        tag_object_name: "{{ group_by_ci }}"
 
-        - name: Find tag based on input variable - Get our application name from the EPG name
-          ansible.builtin.set_fact:
-            tag_object_name: "{{ source_object[0].split('_')[1] }}"
+    - name: Find tag based on input variable - Get tag objects from Panorama
+      paloaltonetworks.panos.panos_tag_object:
+        provider: "{{ provider }}"
+        state: 'gathered'
+        gathered_filter: '*'
+      register: gathered_tag_objects
 
-        - name: Find tag based on input variable - Get tag objects from Panorama
-          paloaltonetworks.panos.panos_tag_object:
-            provider: "{{ provider }}"
-            state: 'gathered'
-            gathered_filter: '*'
-          register: gathered_tag_objects
-
-        - name: Find tag based on input variable - Search for tag object
-          ansible.builtin.set_fact:
-            tag_object: >-
-              {{ gathered_tag_objects.gathered
-                | selectattr('name', 'search', tag_object_name)
-                | rejectattr('name', 'match', '^0')
-                | map(attribute='name')
-                | list }}
-
-        - name: Find tag based on input variable - Detect environment from epg name
-          ansible.builtin.set_fact:
-            env_tag: "{{ (epg_name.split('_') | intersect(['dev', 'tst', 'acc', 'prd', 'ota']) | first) | default('') }}"
+    - name: Find tag based on input variable - Search for tag object {{ tag_object_name }}
+      ansible.builtin.set_fact:
+        tag_object: >-
+          {{ gathered_tag_objects.gathered
+            | selectattr('name', 'search', tag_object_name)
+            | rejectattr('name', 'match', '^0')
+            | map(attribute='name')
+            | list }}
 
     - name: Attempt explicit rule placement
       when: explicit_rule_placement
@@ -65,64 +53,71 @@
             last_rule_name: "{{ (tag_filtered_rules | last).rule_name }}"
           when: (tag_filtered_rules | default([]) | length) > 0
 
-    - name: Create security rule (no explicit placement)
-      paloaltonetworks.panos.panos_security_rule:
-        provider: "{{ provider }}"
-        device_group: "SDDC Proxy"
-        rule_name: "{{ source_object[0].split(' - ')[0] }} to web"
-        description: "{{ source_object[0].split(' - ')[0] }} to web"
-        tag_name: >-
-          {{
-            ['sddc - automated']
-            + ([env_tag] if (env_tag | default('') | string | trim | length) > 0 else [])
-            + ([tag_object | first] if (tag_object | default([]) | length) > 0 else [])
-          }}
-        group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-        source_zone: ['proxy-loopback']
-        source_ip: "{{ source_object[0] }}"
-        destination_zone: ['proxy-external']
-        destination_ip: ['any']
-        service: ['tcp-443']
-        category: "{{ uc_name }}"
-        group_profile: "sddc-strict-proxy-bp"
-        log_setting: "forward-to-panorama"
-        audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
-        action: 'allow'
-      when: (last_rule_name | default('') | string | trim | length) == 0
+- name: Create security rule (no explicit placement)
+  paloaltonetworks.panos.panos_security_rule:
+    provider: "{{ provider }}"
+    device_group: "{{ rule.device_group }}"
+    rule_name: "{{ rule.description }}"
+    description: "{{ rule.description }}"
+    tag_name: "{{ rule.tags }}"
+    group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
+    source_zone: "{{ rule.source_zone }}"
+    source_ip: "{{ rule.source_addresses }}"
+    destination_zone: "{{ rule.destination_zone }}"
+    destination_ip: "{{ rule.destination_addresses }}"
+    service: "{{ rule.services }}"
+    action: 'allow'
+    #group_profile: "sddc-strict-proxy-bp"
+    log_setting: "forward-to-panorama"
+    audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
+    action: 'allow'
+  when: (last_rule_name | default('') | string | trim | length) == 0
 
-    - name: Create security rule (place after rule {{ last_rule_name }})
-      paloaltonetworks.panos.panos_security_rule:
-        provider: "{{ provider }}"
-        device_group: "SDDC Proxy"
-        rule_name: "{{ source_object[0].split(' - ')[0] }} to web"
-        description: "{{ source_object[0].split(' - ')[0] }} to web"
-        tag_name: >-
-          {{
-            ['sddc - automated']
-            + ([env_tag] if (env_tag | default('') | string | trim | length) > 0 else [])
-            + ([tag_object | first] if (tag_object | default([]) | length) > 0 else [])
-          }}
-        group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-        source_zone: ['proxy-loopback']
-        source_ip: "{{ source_object[0] }}"
-        destination_zone: ['proxy-external']
-        destination_ip: ['any']
-        service: ['tcp-443']
-        category: "{{ uc_name }}"
-        action: 'allow'
-        group_profile: "sddc-strict-proxy-bp"
-        log_setting: "forward-to-panorama"
-        audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
-        location: 'after'
-        existing_rule: "{{ last_rule_name }}"
-      when: (last_rule_name | default('') | string | trim | length) > 0
+- name: Create proxy security rule (place after rule {{ last_rule_name }})
+  paloaltonetworks.panos.panos_security_rule:
+    provider: "{{ provider }}"
+    device_group: "{{ rule.device_group }}"
+    rule_name: "{{ rule.description }}"
+    description: "{{ rule.description }}"
+    tag_name: "{{ rule.tags }}"
+    group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
+    source_zone: "{{ rule.source_zone }}"
+    source_ip: "{{ rule.source_addresses }}"
+    destination_zone: "{{ rule.destination_zone }}"
+    destination_ip: "{{ rule.destination_addresses }}"
+    service: "{{ rule.services }}"
+    action: 'allow'
+    #group_profile: "sddc-strict-proxy-bp"
+    log_setting: "forward-to-panorama"
+    audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
+    location: 'after'
+    existing_rule: "{{ last_rule_name }}"
+  when: (last_rule_name | default('') | string | trim | length) > 0
 
-    - name: Set commit needed to true
-      ansible.builtin.set_fact:
-        commit: true
-      when: perform_commit
+- name: Set commit needed to true
+  ansible.builtin.set_fact:
+    commit: true
+  when: perform_commit
 
-    - name: Set push needed to true
-      ansible.builtin.set_fact:
-        push: true
-      when: perform_commit
+- name: Set push needed to true
+  ansible.builtin.set_fact:
+    push: true
+  when: perform_commit
+
+- name: Commit changes by ansible user when commit is needed + CHECK PUSH!
+  # Commit changes when commit flag has been set
+  paloaltonetworks.panos.panos_commit_panorama:
+    provider: "{{ provider }}"
+    admins: ['{{ provider.username }}']
+    description: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
+  when: commit | default(false)
+
+- name: Push device group configs
+  # Push changes to DG when push flag has been set
+  paloaltonetworks.panos.panos_commit_push:
+    provider: "{{ provider }}"
+    admins: ['{{ provider.username }}']
+    style: "device group"
+    name: "{{ device_group }}"
+    description: "Push from Ansible orchestrator"
+  when: push | default(false)
