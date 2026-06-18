@@ -56,7 +56,7 @@
 - name: Create security rule (no explicit placement)
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group }}"
+    device_group: "{{ rule.device_group[0] }}"
     rule_name: "{{ rule.description }}"
     description: "{{ rule.description }}"
     tag_name: "{{ rule.tags }}"
@@ -76,7 +76,7 @@
 - name: Create proxy security rule (place after rule {{ last_rule_name }})
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group }}"
+    device_group: "{{ rule.device_group[0] }}"
     rule_name: "{{ rule.description }}"
     description: "{{ rule.description }}"
     tag_name: "{{ rule.tags }}"
