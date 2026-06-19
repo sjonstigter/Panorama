@@ -9,7 +9,7 @@
     debug: false # set to true to show extra debug information
     explicit_rule_placement: true # set to true to attempt placing new rules in explicit order (requires lookup_tags to be true) - EXPERIMENTAL
     lookup_tags: true
-    create_rule: false
+    create_rule: true
 
     provider:
       ip_address: "{{ inventory_hostname }}"
