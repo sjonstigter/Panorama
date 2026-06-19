@@ -17,6 +17,14 @@
       password: '{{ lookup("env", "ANSIBLE_NET_PASSWORD") }}'
 
   tasks:
+    - name: Initialise addres objects list
+      ansible.builtin.set_fact:
+        address_objects_created: []
+
+    - name: Initialise service objects list
+      ansible.builtin.set_fact:
+        service_objects_created: []
+
     - name: Process each combined firewall rule
       ansible.builtin.include_tasks: includes/process-firewall-rule.yml
       loop: "{{ combined_firewall_rules }}"
@@ -28,3 +36,9 @@
       ansible.builtin.set_stats:
         data:
           processed_combined_firewall_rules: "{{ processed_combined_firewall_rules }}"
+
+    - name: Set stat our info
+      ansible.builtin.set_stats:
+        data:
+          address_objects_created: "{{ address_objects_created }}"
+          service_objects_created: "{{ service_objects_created }}"
