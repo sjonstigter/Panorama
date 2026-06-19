@@ -42,6 +42,10 @@
     value: "{{ address_object_value }}"
     device_group: shared
 
+- name: Append created address object to address_objects_created
+  ansible.builtin.set_fact:
+    address_objects_created: "{{ address_objects_created + [address_object_name] }}"
+
 - name: Get address objects from Panorama again after creating missing objects
   paloaltonetworks.panos.panos_address_object:
     provider: "{{ provider }}"

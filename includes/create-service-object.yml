@@ -10,6 +10,10 @@
     protocol: "{{ service_protocol }}"
     destination_port: "{{ port }}"
 
+- name: Append created service object to service_objects_created
+  ansible.builtin.set_fact:
+    service_objects_created: "{{ service_objects_created + [service_name] }}"
+
 - name: Rerun Get service objects from Panorama
   paloaltonetworks.panos.panos_service_object:
     provider: "{{ provider }}"

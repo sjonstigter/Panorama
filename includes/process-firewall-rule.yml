@@ -1,4 +1,12 @@
 ---
+- name: Initialise addres objects list
+  ansible.builtin.set_fact:
+    address_objects_created: []
+
+- name: Initialise service objects list
+  ansible.builtin.set_fact:
+    service_objects_created: []
+
 # Source Address function
 - name: Get address objects from Panorama
   paloaltonetworks.panos.panos_address_object:
@@ -322,3 +330,9 @@
     loop_var: device_group_name
     label: "{{ device_group_name }}"
   when: create_rule
+
+- name: Set stat our info
+  ansible.builtin.set_stats:
+    data:
+      address_objects_created: "{{ address_objects_created }}"
+      service_objects_created: "{{ service_objects_created }}"
