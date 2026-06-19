@@ -48,6 +48,8 @@ def combine_firewall_rules(rules, combine_mode="port"):
                 "description": rule.get("description"),
                 "source_zone": rule.get("source_zone"),
                 "destination_zone": rule.get("destination_zone"),
+                "az_source_zone": rule.get("az_source_zone"),
+                "az_destination_zone": rule.get("az_destination_zone"),
                 "service_protocol": rule.get("service_protocol", "").lower(),
                 "group_id": rule.get("group_id"),
                 "action": rule.get("action", "").lower(),
