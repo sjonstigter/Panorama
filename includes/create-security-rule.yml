@@ -8,7 +8,7 @@
       ss-internal: "sddc-strict-internal"
       ss-external: "sddc-strict-edge-bp"
 
-- name: Select processed firewall rule for current device_group
+- name: Select processed firewall rule for current device_group we are running
   ansible.builtin.set_fact:
     processed_rule: >-
       {{
@@ -18,7 +18,7 @@
         | first
       }}
 
-- name: Get all security rules from the device
+- name: Get all security rules from Panorama for the device_group
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
     device_group: "{{ device_group_name }}"
