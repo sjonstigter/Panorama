@@ -319,5 +319,5 @@
   ansible.builtin.include_tasks: includes/create-security-rule.yml
   loop: "{{ rule.device_group }}"
   loop_control:
-    loop_var: rule
+    loop_var: device_group_name
     label: "{{ device_group_name }}"

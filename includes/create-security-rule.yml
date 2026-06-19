@@ -11,7 +11,7 @@
 - name: Get all security rules from the device
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group[0] }}"
+    device_group: "{{ device_group[0] }}"
     state: 'gathered'
     gathered_filter: '*'
   register: security_rules
@@ -65,18 +65,18 @@
 - name: Create security rule (no explicit placement)
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group[0] }}"
-    rule_name: "{{ rule.description }}"
-    description: "{{ rule.description }}"
-    #tag_name: "{{ rule.resolved_tag }}"
+    device_group: "{{ device_group[0] }}"
+    rule_name: "{{ description }}"
+    description: "{{ description }}"
+    tag_name: "{{ resolved_tag }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ rule.source_zone }}"
-    source_ip: "{{ rule.source_addresses }}"
-    destination_zone: "{{ rule.destination_zone }}"
-    destination_ip: "{{ rule.destination_addresses }}"
-    service: "{{ rule.services }}"
-    action: "{{ rule.action }}"
-    group_profile: "{{ security_group_profile_list[rule.device_group[0]] }}"
+    source_zone: "{{ source_zone }}"
+    source_ip: "{{ source_addresses }}"
+    destination_zone: "{{ destination_zone }}"
+    destination_ip: "{{ destination_addresses }}"
+    service: "{{ services }}"
+    action: "{{ action }}"
+    group_profile: "{{ security_group_profile_list[device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     action: 'allow'
@@ -85,17 +85,17 @@
 - name: Create security rule (place after rule {{ last_rule_name }})
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group[0] }}"
-    rule_name: "{{ rule.description }}"
-    description: "{{ rule.description }}"
-    #tag_name: "{{ rule.resolved_tag }}"
+    device_group: "{{ device_group[0] }}"
+    rule_name: "{{ description }}"
+    description: "{{ description }}"
+    tag_name: "{{ resolved_tag }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ rule.source_zone }}"
-    source_ip: "{{ rule.source_addresses }}"
-    destination_zone: "{{ rule.destination_zone }}"
-    destination_ip: "{{ rule.destination_addresses }}"
-    service: "{{ rule.services }}"
-    action: "{{ rule.action }}"
+    source_zone: "{{ source_zone }}"
+    source_ip: "{{ source_addresses }}"
+    destination_zone: "{{ destination_zone }}"
+    destination_ip: "{{ destination_addresses }}"
+    service: "{{ services }}"
+    action: "{{ action }}"
     group_profile: "{{ security_group_profile_list[rule.device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
