@@ -34,6 +34,10 @@
   when: lookup_tags
   block:
 
+    - name: Make sure last_rule_name is empty
+      ansible.builtin.set_fact:
+        last_rule_name: ""
+
     - name: Find tag based on input variable - Get our application name from the EPG name
       ansible.builtin.set_fact:
         tag_object_name: "{{ group_by_ci }}"
