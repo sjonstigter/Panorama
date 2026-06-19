@@ -11,7 +11,7 @@
 - name: Get all security rules from the device
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group }}"
+    device_group: "{{ rule.device_group[0] }}"
     state: 'gathered'
     gathered_filter: '*'
   register: security_rules
@@ -65,7 +65,7 @@
 - name: Create security rule (no explicit placement)
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group }}"
+    device_group: "{{ rule.device_group[0] }}"
     rule_name: "{{ rule.description }}"
     description: "{{ rule.description }}"
     tag_name: "{{ rule.tags }}"
@@ -76,7 +76,7 @@
     destination_ip: "{{ rule.destination_addresses }}"
     service: "{{ rule.services }}"
     action: "{{ rule.action }}"
-    group_profile: "{{ security_group_profile_list[rule.device_group] }}"
+    group_profile: "{{ security_group_profile_list[rule.device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     action: 'allow'
@@ -85,7 +85,7 @@
 - name: Create security rule (place after rule {{ last_rule_name }})
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ rule.device_group }}"
+    device_group: "{{ rule.device_group[0] }}"
     rule_name: "{{ rule.description }}"
     description: "{{ rule.description }}"
     tag_name: "{{ rule.tags }}"
@@ -96,7 +96,7 @@
     destination_ip: "{{ rule.destination_addresses }}"
     service: "{{ rule.services }}"
     action: "{{ rule.action }}"
-    group_profile: "{{ security_group_profile_list[rule.device_group] }}"
+    group_profile: "{{ security_group_profile_list[rule.device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     location: 'after'
@@ -127,6 +127,6 @@
     provider: "{{ provider }}"
     admins: ['{{ provider.username }}']
     style: "device group"
-    name: "{{ device_group }}"
+    name: "{{ device_group[0] }}"
     description: "Push from Ansible orchestrator"
   when: push | default(false)
