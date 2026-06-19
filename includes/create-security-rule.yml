@@ -31,7 +31,7 @@
   block:
 
     - name: Make sure last_rule_name is empty
-      # Not sure why the var keeps sticking between loops
+      # Not sure why the var keeps sticking between loops, empty it out just to be sure
       ansible.builtin.set_fact:
         last_rule_name: ""
 
@@ -85,9 +85,9 @@
     description: "{{ processed_rule.description }}"
     tag_name: "{{ processed_rule.tags }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ processed_rule.source_zone }}"
+    source_zone: "{{ az_source_zone if device_group_name == 'SDDC Azure' else processed_rule.source_zone }}"
     source_ip: "{{ processed_rule.source_addresses | flatten }}"
-    destination_zone: "{{ processed_rule.destination_zone }}"
+    destination_zone: "{{ az_destination_zone if device_group_name == 'SDDC Azure' else processed_rule.destination_zone }}"
     destination_ip: "{{ processed_rule.destination_addresses }}"
     service: "{{ processed_rule.services }}"
     action: "{{ processed_rule.action }}"
@@ -105,9 +105,9 @@
     description: "{{ processed_rule.description }}"
     tag_name: "{{ processed_rule.tags }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ processed_rule.source_zone }}"
+    source_zone: "{{ az_source_zone if device_group_name == 'SDDC Azure' else processed_rule.source_zone }}"
     source_ip: "{{ processed_rule.source_addresses | flatten }}"
-    destination_zone: "{{ processed_rule.destination_zone }}"
+    destination_zone: "{{ az_destination_zone if device_group_name == 'SDDC Azure' else processed_rule.destination_zone }}"
     destination_ip: "{{ processed_rule.destination_addresses }}"
     service: "{{ processed_rule.services }}"
     action: "{{ processed_rule.action }}"
