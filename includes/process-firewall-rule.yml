@@ -220,7 +220,6 @@
           | selectattr('destination_port', 'equalto', item | string)
           | map(attribute='name')
           | list
-          | first
         )
       }}
   loop: "{{ normalised_service_destination_ports }}"
@@ -318,7 +317,7 @@
 
 - name: Create the security rule looping through the device_groups
   ansible.builtin.include_tasks: includes/create-security-rule.yml
-  loop: "{{ device_group }}"
+  loop: "{{ rule.device_group }}"
   loop_control:
-    loop_var: rule
-    label: "{{ rule.description }}"
+    loop_var: device_group_name
+    label: "{{ device_group_name }}"
