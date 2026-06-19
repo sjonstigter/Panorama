@@ -12,6 +12,16 @@
   ansible.builtin.debug:
     msg: "{{ processed_combined_firewall_rules }}"
 
+- name: Select processed firewall rule for current device_group
+  ansible.builtin.set_fact:
+    processed_rule: >-
+      {{
+        processed_combined_firewall_rules
+        | selectattr('device_group', 'contains', device_group_name)
+        | list
+        | first
+      }}
+
 - name: Get all security rules from the device
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
@@ -70,16 +80,16 @@
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
     device_group: "{{ device_group_name }}"
-    rule_name: "{{ processed_combined_firewall_rules.description }}"
-    description: "{{ processed_combined_firewall_rules.description }}"
-    tag_name: "{{ processed_combined_firewall_rules.tags }}"
+    rule_name: "{{ processed_rule.description }}"
+    description: "{{ processed_rule.description }}"
+    tag_name: "{{ processed_rule.tags }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ processed_combined_firewall_rules.source_zone }}"
-    source_ip: "{{ processed_combined_firewall_rules.source_addresses }}"
-    destination_zone: "{{ processed_combined_firewall_rules.destination_zone }}"
-    destination_ip: "{{ processed_combined_firewall_rules.destination_addresses }}"
-    service: "{{ processed_combined_firewall_rules.services }}"
-    action: "{{ processed_combined_firewall_rules.action }}"
+    source_zone: "{{ processed_rule.source_zone }}"
+    source_ip: "{{ processed_rule.source_addresses }}"
+    destination_zone: "{{ processed_rule.destination_zone }}"
+    destination_ip: "{{ processed_rule.destination_addresses }}"
+    service: "{{ processed_rule.services }}"
+    action: "{{ processed_rule.action }}"
     group_profile: "{{ security_group_profile_list[device_group_name] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
@@ -90,16 +100,16 @@
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
     device_group: "{{ device_group_name }}"
-    rule_name: "{{ processed_combined_firewall_rules.description }}"
-    description: "{{ processed_combined_firewall_rules.description }}"
-    tag_name: "{{ processed_combined_firewall_rules.tags }}"
+    rule_name: "{{ processed_rule.description }}"
+    description: "{{ processed_rule.description }}"
+    tag_name: "{{ processed_rule.tags }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ processed_combined_firewall_rules.source_zone }}"
-    source_ip: "{{ processed_combined_firewall_rules.source_addresses }}"
-    destination_zone: "{{ processed_combined_firewall_rules.destination_zone }}"
-    destination_ip: "{{ processed_combined_firewall_rules.destination_addresses }}"
-    service: "{{ processed_combined_firewall_rules.services }}"
-    action: "{{ processed_combined_firewall_rules.action }}"
+    source_zone: "{{ processed_rule.source_zone }}"
+    source_ip: "{{ processed_rule.source_addresses }}"
+    destination_zone: "{{ processed_rule.destination_zone }}"
+    destination_ip: "{{ processed_rule.destination_addresses }}"
+    service: "{{ processed_rule.services }}"
+    action: "{{ processed_rule.action }}"
     group_profile: "{{ security_group_profile_list[device_group_name] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
