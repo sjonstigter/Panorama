@@ -94,7 +94,6 @@
     group_profile: "{{ security_group_profile_list[device_group_name] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
-    action: 'allow'
   when: (last_rule_name | default('') | string | trim | length) == 0
 
 - name: Create security rule (place after rule {{ last_rule_name }})
