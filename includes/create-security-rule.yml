@@ -80,10 +80,6 @@
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     action: 'allow'
-  loop: "{{ rule.device_group }}"
-  loop_control:
-    loop_var: device_group_name
-    label: "{{ device_group_name }}"
   when: (last_rule_name | default('') | string | trim | length) == 0
 
 - name: Create security rule (place after rule {{ last_rule_name }})
@@ -105,10 +101,6 @@
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     location: 'after'
     existing_rule: "{{ last_rule_name }}"
-  loop: "{{ rule.device_group }}"
-  loop_control:
-    loop_var: device_group_name
-    label: "{{ device_group_name }}"
   when: (last_rule_name | default('') | string | trim | length) > 0
 
 - name: Set commit needed to true

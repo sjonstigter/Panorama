@@ -315,3 +315,10 @@
           })
         ]
       }}
+
+- name: Create the security rule looping through the device_groups
+  ansible.builtin.include_tasks: includes/create-security-rule.yml
+  loop: "{{ device_group }}"
+  loop_control:
+    loop_var: rule
+    label: "{{ rule.description }}"
