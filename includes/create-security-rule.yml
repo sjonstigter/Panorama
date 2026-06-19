@@ -121,7 +121,7 @@
 
 - name: Append created address object to security_rules_created
   ansible.builtin.set_fact:
-    security_rules_created: "{{ security_rules_created + [processed_rule.description] }}"
+    security_rules_created: "{{ security_rules_created + [processed_rule.description ~ ' on ' ~ device_group_name] }}"
 
 - name: Set commit needed to true
   ansible.builtin.set_fact:
