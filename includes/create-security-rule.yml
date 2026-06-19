@@ -119,9 +119,9 @@
     existing_rule: "{{ last_rule_name }}"
   when: (last_rule_name | default('') | string | trim | length) > 0
 
-- name: Append created address object to address_objects_created
+- name: Append created address object to security_rules_created
   ansible.builtin.set_fact:
-    address_objects_created: "{{ address_objects_created + [processed_rule.description] }}"
+    security_rules_created: "{{ security_rules_created + [processed_rule.description] }}"
 
 - name: Set commit needed to true
   ansible.builtin.set_fact:
