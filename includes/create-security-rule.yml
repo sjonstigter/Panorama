@@ -8,10 +8,6 @@
       ss-internal: "sddc-strict-internal"
       ss-external: "sddc-strict-edge-bp"
 
-- name: show variable
-  ansible.builtin.debug:
-    msg: "{{ processed_combined_firewall_rules }}"
-
 - name: Select processed firewall rule for current device_group
   ansible.builtin.set_fact:
     processed_rule: >-
@@ -35,6 +31,7 @@
   block:
 
     - name: Make sure last_rule_name is empty
+      # Not sure why the var keeps sticking between loops
       ansible.builtin.set_fact:
         last_rule_name: ""
 
