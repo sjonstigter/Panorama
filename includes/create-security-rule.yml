@@ -11,7 +11,7 @@
 - name: Get all security rules from the device
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ device_group[0] }}"
+    device_group: "{{ processed_combined_firewall_rules.device_group[0] }}"
     state: 'gathered'
     gathered_filter: '*'
   register: security_rules
@@ -65,18 +65,18 @@
 - name: Create security rule (no explicit placement)
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ device_group[0] }}"
-    rule_name: "{{ description }}"
-    description: "{{ description }}"
-    tag_name: "{{ resolved_tag }}"
+    device_group: "{{ processed_combined_firewall_rules.device_group[0] }}"
+    rule_name: "{{ processed_combined_firewall_rules.description }}"
+    description: "{{ processed_combined_firewall_rules.description }}"
+    tag_name: "{{ processed_combined_firewall_rules.tags }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ source_zone }}"
-    source_ip: "{{ source_addresses }}"
-    destination_zone: "{{ destination_zone }}"
-    destination_ip: "{{ destination_addresses }}"
-    service: "{{ services }}"
-    action: "{{ action }}"
-    group_profile: "{{ security_group_profile_list[device_group[0]] }}"
+    source_zone: "{{ processed_combined_firewall_rules.source_zone }}"
+    source_ip: "{{ processed_combined_firewall_rules.source_addresses }}"
+    destination_zone: "{{ processed_combined_firewall_rules.destination_zone }}"
+    destination_ip: "{{ processed_combined_firewall_rules.destination_addresses }}"
+    service: "{{ processed_combined_firewall_rules.services }}"
+    action: "{{ processed_combined_firewall_rules.action }}"
+    group_profile: "{{ security_group_profile_list[processed_combined_firewall_rules.device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     action: 'allow'
@@ -85,18 +85,18 @@
 - name: Create security rule (place after rule {{ last_rule_name }})
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
-    device_group: "{{ device_group[0] }}"
-    rule_name: "{{ description }}"
-    description: "{{ description }}"
-    tag_name: "{{ resolved_tag }}"
+    device_group: "{{ processed_combined_firewall_rules.device_group[0] }}"
+    rule_name: "{{ processed_combined_firewall_rules.description }}"
+    description: "{{ processed_combined_firewall_rules.description }}"
+    tag_name: "{{ processed_combined_firewall_rules.tags }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ source_zone }}"
-    source_ip: "{{ source_addresses }}"
-    destination_zone: "{{ destination_zone }}"
-    destination_ip: "{{ destination_addresses }}"
-    service: "{{ services }}"
-    action: "{{ action }}"
-    group_profile: "{{ security_group_profile_list[rule.device_group[0]] }}"
+    source_zone: "{{ processed_combined_firewall_rules.source_zone }}"
+    source_ip: "{{ processed_combined_firewall_rules.source_addresses }}"
+    destination_zone: "{{ processed_combined_firewall_rules.destination_zone }}"
+    destination_ip: "{{ processed_combined_firewall_rules.destination_addresses }}"
+    service: "{{ processed_combined_firewall_rules.services }}"
+    action: "{{ processed_combined_firewall_rules.action }}"
+    group_profile: "{{ security_group_profile_list[processed_combined_firewall_rules.device_group[0]] }}"
     log_setting: "forward-to-panorama"
     audit_comment: "AAP job ID: {{ awx_job_id | default('n/a') }} - AAP User: {{ awx_user_name | default('n/a') }} - ICD: {{ ticket_num | default('no-CR') }}"
     location: 'after'
@@ -127,6 +127,6 @@
     provider: "{{ provider }}"
     admins: ['{{ provider.username }}']
     style: "device group"
-    name: "{{ device_group[0] }}"
+    name: "{{ processed_combined_firewall_rules.device_group[0] }}"
     description: "Push from Ansible orchestrator"
   when: push | default(false)
