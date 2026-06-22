@@ -75,7 +75,7 @@
 
 - name: Check if requested access already exists
   ansible.builtin.include_tasks: includes/check-security-rules.yml
-  when: validate_rule_access
+  when: use_policy_checker
 
 - name: Add resolved row to firewall_rules_resolved
   ansible.builtin.set_fact:
