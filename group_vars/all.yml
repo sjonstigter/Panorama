@@ -36,13 +36,33 @@ infoblox_wapi_version: v2.12.3
 debug: true
 
 ############################################################
-# Enable to use the Palo Alot Policy Checker to test if 
+# Enable to use the Palo Alto Policy Checker to test if 
 # requested rules already match an existing security rule
 ############################################################
 use_policy_checker: true
 
-perform_commit: false # set to false if you do not want the playbook to perform actual Panorama commits
-debug: false # set to true to show extra debug information
-explicit_rule_placement: true # set to true to attempt placing new rules in explicit order (requires lookup_tags to be true) - EXPERIMENTAL
+############################################################
+# Enable to have Panorama commit and push the changes 
+############################################################
+perform_commit: false
+
+############################################################
+# Determines if the playbook should attempt explicit 
+# placement of the firewall rules base on the group_by tag
+#
+# Requires lookup_tags to be set to: true 
+############################################################
+explicit_rule_placement: true
+
+############################################################
+# Set to true to have the playbook attempt tag name lookup
+# based on the EPG name 
+############################################################
 lookup_tags: true
+
+############################################################
+# Enable to have Panorama actually create the security rule
+# Can be disabled to have playbook not actually create
+# security rules on Panorama 
+############################################################
 create_rule: true
