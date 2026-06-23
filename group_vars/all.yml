@@ -37,7 +37,7 @@ debug: true
 
 ############################################################
 # Enable to use the Palo Alto Policy Checker to test if 
-# requested rules already match an existing security rule
+# requested rules already matches an existing security rule
 ############################################################
 use_policy_checker: true
 
