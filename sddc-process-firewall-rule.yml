@@ -5,16 +5,16 @@
   gather_facts: false
 
   vars:
-    perform_commit: false # set to false if you do not want the playbook to perform actual Panorama commits
-    debug: false # set to true to show extra debug information
-    explicit_rule_placement: true # set to true to attempt placing new rules in explicit order (requires lookup_tags to be true) - EXPERIMENTAL
-    lookup_tags: true
-    create_rule: true
+#    perform_commit: false # set to false if you do not want the playbook to perform actual Panorama commits
+#    debug: false # set to true to show extra debug information
+#    explicit_rule_placement: true # set to true to attempt placing new rules in explicit order (requires lookup_tags to be true) - EXPERIMENTAL
+#    lookup_tags: true
+#    create_rule: true
 
     provider:
-      ip_address: "{{ inventory_hostname }}"
-      username: '{{ lookup("env", "ANSIBLE_NET_USERNAME") }}'
-      password: '{{ lookup("env", "ANSIBLE_NET_PASSWORD") }}'
+      ip_address: "{{ panorama_address }}"
+      username: '{{ panorama_username }}'
+      password: '{{ panorama_password }}'
 
   tasks:
     - name: Initialise created objects lists

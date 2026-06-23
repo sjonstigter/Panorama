@@ -1,4 +1,7 @@
 ---
+############################################################
+# Palo Alto Panorama credentials
+############################################################
 panorama_address: 192.168.7.235
 panorama_username: admin
 panorama_password: !vault |
@@ -9,6 +12,9 @@ panorama_password: !vault |
           6234643638373936360a343133313839613736396663393437626633343137363062303730383564
           3936
 
+############################################################
+# Infoblox credentials
+############################################################
 infoblox_address: infoblox.zero-days.nl
 infoblox_username: admin
 infoblox_password: !vault |
@@ -19,6 +25,24 @@ infoblox_password: !vault |
           3539383031326433640a323630323863363939336431323932646265363136613930643533343737
           3438
 
+############################################################
+# Infoblox WAPI version to use
+############################################################
 infoblox_wapi_version: v2.12.3
+
+############################################################
+# Enable additional debug tasks in playbook execution
+############################################################
 debug: true
+
+############################################################
+# Enable to use the Palo Alot Policy Checker to test if 
+# requested rules already match an existing security rule
+############################################################
 use_policy_checker: true
+
+perform_commit: false # set to false if you do not want the playbook to perform actual Panorama commits
+debug: false # set to true to show extra debug information
+explicit_rule_placement: true # set to true to attempt placing new rules in explicit order (requires lookup_tags to be true) - EXPERIMENTAL
+lookup_tags: true
+create_rule: true
