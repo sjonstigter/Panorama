@@ -69,6 +69,10 @@
         type: "external"
 
   tasks:
+    - name: Initialise objects lists
+      ansible.builtin.set_fact:
+        existing_rules_found: []
+
     - name: Resolve host IPs to Infoblox networks
       ansible.builtin.include_tasks: includes/resolve-firewall-row.yml
       loop: "{{ firewall_rules }}"

@@ -75,3 +75,7 @@
         msg: >-
           message: {{ (result.msg | default('No rule lookup performed')).split(';')[0] }}
           matched rule: {{ result.rule.name | default(none) }}
+
+    - name: Append found security rules to existing_rules_found
+      ansible.builtin.set_fact:
+        existing_rules_found: "{{ existing_rules_found + [result.rule.name] }}"
