@@ -1,8 +1,20 @@
 def combine_firewall_rules(rules, combine_mode="port"):
     combined = {}
 
+#    for rule in rules:
+#        if str(rule.get("rule_match", "")).strip().lower() == "rule matched":
+#            continue
+
     for rule in rules:
-        if str(rule.get("rule_match", "")).strip().lower() == "rule matched":
+        source_task = str(rule.get("source_task", "")).strip().lower()
+        destination_task = str(rule.get("destination_task", "")).strip().lower()
+        rule_match = str(rule.get("rule_match", "")).strip().lower()
+
+        if (
+            rule_match == "rule matched"
+            or "sddc" not in source_task
+            or "sddc" not in destination_task
+        ):
             continue
 
 #    for rule in rules:
