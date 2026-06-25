@@ -18,7 +18,6 @@
       udp-123: "ntp"
       tcp-443: "ssl"
       udp-514: "syslog"
-      tcp-1433: "mssql-db-encrypted"
       tcp-6514: "syslog"
       tcp-3389: "ms-rdp"
       udp-3389: "ms-rdp"
