@@ -8,6 +8,20 @@
       ss-internal: "sddc-strict-internal"
       ss-external: "sddc-strict-edge-bp"
 
+- name: Service to well known application mapping
+  ansible.builtin.set_fact:
+    service_to_application_list:
+      tcp-22: "ssh"
+      tcp-53: "dns"
+      udp-53: "dns"
+      tcp-123: "ntp"
+      udp-123: "ntp"
+      tcp-443: "ssl"
+      udp-514: "syslog"
+      tcp-6514: "syslog"
+      tcp-3389: "ms-rdp"
+      udp-3389: "ms-rdp"
+
 - name: Select processed firewall rule for current device_group we are running
   ansible.builtin.set_fact:
     processed_rule: >-
@@ -17,6 +31,17 @@
         | list
         | first
       }}
+
+- name: Make sure application is empty
+  ansible.builtin.set_fact:
+    application: ""
+
+- name: Resolve application from service
+  ansible.builtin.set_fact:
+    application: "{{ service_to_application_list.get(processed_rule.services | first | string) | default('', true) }}"
+  when:
+    - processed_rule.services is defined
+    - processed_rule.services | length == 1
 
 - name: Get all security rules from Panorama for the device_group
   paloaltonetworks.panos.panos_security_rule:
@@ -89,7 +114,19 @@
     source_ip: "{{ processed_rule.source_addresses | flatten }}"
     destination_zone: "{{ processed_rule.az_destination_zone if device_group_name == 'SDDC Azure' else processed_rule.destination_zone }}"
     destination_ip: "{{ processed_rule.destination_addresses }}"
-    service: "{{ processed_rule.services }}"
+    #service: "{{ processed_rule.services }}"
+    service: >-
+      {{
+        'application-default'
+        if application is defined and application | length > 0
+        else processed_rule.services
+      }}
+    application: >-
+      {{
+        application
+        if application is defined and application | length > 0
+        else 'any'
+      }}
     action: "{{ processed_rule.action }}"
     group_profile: "{{ security_group_profile_list[device_group_name] }}"
     log_setting: "forward-to-panorama"
@@ -109,7 +146,19 @@
     source_ip: "{{ processed_rule.source_addresses | flatten }}"
     destination_zone: "{{ processed_rule.az_destination_zone if device_group_name == 'SDDC Azure' else processed_rule.destination_zone }}"
     destination_ip: "{{ processed_rule.destination_addresses }}"
-    service: "{{ processed_rule.services }}"
+    #service: "{{ processed_rule.services }}"
+    service: >-
+      {{
+        'application-default'
+        if application is defined and application | length > 0
+        else processed_rule.services
+      }}
+    application: >-
+      {{
+        application
+        if application is defined and application | length > 0
+        else 'any'
+      }}
     action: "{{ processed_rule.action }}"
     group_profile: "{{ security_group_profile_list[device_group_name] }}"
     log_setting: "forward-to-panorama"
