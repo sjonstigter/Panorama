@@ -33,6 +33,7 @@
       }}
 
 - name: Make sure application is empty
+  # Not sure why the var keeps sticking between loops, empty it out just to be sure
   ansible.builtin.set_fact:
     application: ""
 
@@ -114,7 +115,7 @@
     source_ip: "{{ processed_rule.source_addresses | flatten }}"
     destination_zone: "{{ processed_rule.az_destination_zone if device_group_name == 'SDDC Azure' else processed_rule.destination_zone }}"
     destination_ip: "{{ processed_rule.destination_addresses }}"
-    #service: "{{ processed_rule.services }}"
+    # service: "{{ processed_rule.services }}"
     service: >-
       {{
         'application-default'
@@ -146,7 +147,7 @@
     source_ip: "{{ processed_rule.source_addresses | flatten }}"
     destination_zone: "{{ processed_rule.az_destination_zone if device_group_name == 'SDDC Azure' else processed_rule.destination_zone }}"
     destination_ip: "{{ processed_rule.destination_addresses }}"
-    #service: "{{ processed_rule.services }}"
+    # service: "{{ processed_rule.services }}"
     service: >-
       {{
         'application-default'
