@@ -101,7 +101,8 @@
       ansible.builtin.debug:
         var: combined_firewall_rules
 
-    - name: Set stat combined_firewall_rules
+    - name: Set stat combined_firewall_rules and existing_rules_found
       ansible.builtin.set_stats:
         data:
           combined_firewall_rules: "{{ combined_firewall_rules }}"
+          existing_rules_found: "{{ existing_rules_found }}"

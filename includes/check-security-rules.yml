@@ -79,3 +79,5 @@
     - name: Append found security rules to existing_rules_found
       ansible.builtin.set_fact:
         existing_rules_found: "{{ existing_rules_found + [result.rule.name] }}"
+      when:
+        - result.rule.name is defined
