@@ -124,6 +124,7 @@
     label: "{{ item.address }}"
 
 # Service object functions
+# Move to an include so we can loop through protocol on the include?
 - name: Normalise input values for service ports
   ansible.builtin.set_fact:
     normalised_service_destination_ports: >-
@@ -178,32 +179,6 @@
   vars:
     service_protocol: "{{ normalised_service_protocol }}"
 
-#- name: Build service port to first service object name map
-#  ansible.builtin.set_fact:
-#    service_object_map: >-
-#      {{
-#        service_object_map | default({}) |
-#        combine({
-#          item.destination_port | string: item.name
-#        })
-#      }}
-#  loop: "{{ gathered_service_objects.gathered }}"
-#  loop_control:
-#    label: "{{ item.name }}"
-#  when:
-#    - item.protocol == normalised_service_protocol
-#    - item.destination_port | string not in (service_object_map | default({}))
-
-#- name: Build resolved service object names
-#  ansible.builtin.set_fact:
-#    resolved_services: >-
-#      {{
-#        normalised_service_destination_ports
-#        | map('string')
-#        | map('extract', service_object_map)
-#        | list
-#      }}
-
 - name: Initialise resolved service object list
   ansible.builtin.set_fact:
     resolved_services: []
@@ -225,6 +200,7 @@
   loop: "{{ normalised_service_destination_ports }}"
   loop_control:
     label: "{{ normalised_service_protocol }}-{{ item }}"
+# / Move to an include so we can loop through protocol on the include?
 
 # tag object functions
 - name: Find tag based on input variable - Get tag objects from Panorama
