@@ -12,8 +12,10 @@ def combine_firewall_rules(rules, combine_mode="port"):
 
         if (
             rule_match == "rule matched"
-            or "sddc" not in source_task
-            or "sddc" not in destination_task
+            or (
+                "sddc" not in source_task
+                and "sddc" not in destination_task
+            )
         ):
             continue
 
