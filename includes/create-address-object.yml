@@ -31,6 +31,13 @@
     address_object_name: "net_{{ address | replace('/', '_') }}"
   when: address_is_network
 
+- name: Set address object name - Overwrite when we have an object name
+  ansible.builtin.set_fact:
+    address_object_name: "{{ obj_name }} - {{ address | replace('/', '_') }}"
+  when:
+    - obj_name is defined
+    - obj_name | length > 0
+
 - name: Set host address value
   ansible.builtin.set_fact:
     address_object_value: "{{ address }}"
