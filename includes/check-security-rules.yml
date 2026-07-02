@@ -37,6 +37,13 @@
           tcp: "6"
           udp: "17"
 
+    - name: Service to well known application mapping
+      # Fix flakey Palo Alto policy checker behaviour on any-any drop policies by adding the AppID
+      ansible.builtin.set_fact:
+        service_to_application_list:
+          "22": "ssh"
+          "443": "ssl"
+
     - name: Convert source subnet to a host address inside the range for rule validation
       ansible.builtin.set_fact:
         source_is_host: true
@@ -64,6 +71,12 @@
         destination_ip: "{{ pol_destination_address | default(rule.destination_address, true) }}"
         destination_port: "{{ rule.service_destination_port[0] }}"
         protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
+        application: >-
+          {{
+            service_to_application_list[
+              rule.service_destination_port[0] | string
+            ] | default('any')
+          }}
       register: result
       when:
         # Policy checker only accepts hosts so make sure we do not parse any network ranges or it will cause a fail
