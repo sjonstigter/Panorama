@@ -44,6 +44,28 @@
     - processed_rule.services is defined
     - processed_rule.services | length == 1
 
+- name: Resolve source zone
+  ansible.builtin.set_fact:
+    resolved_source_zone: >-
+      {{
+        'aci-internal'
+        if device_group_name == 'SG-Internal'
+        else processed_rule.az_source_zone
+        if device_group_name == 'SDDC Azure'
+        else processed_rule.source_zone
+      }}
+
+- name: Resolve destination zone
+  ansible.builtin.set_fact:
+    resolved_destination_zone: >-
+      {{
+        'aci-internal'
+        if device_group_name == 'SG-Internal'
+        else processed_rule.az_destination_zone
+        if device_group_name == 'SDDC Azure'
+        else processed_rule.destination_zone
+      }}
+
 - name: Get all security rules from Panorama for the device_group
   paloaltonetworks.panos.panos_security_rule:
     provider: "{{ provider }}"
@@ -111,9 +133,9 @@
     description: "{{ processed_rule.description }}"
     tag_name: "{{ processed_rule.tags }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ processed_rule.az_source_zone if device_group_name == 'SDDC Azure' else processed_rule.source_zone }}"
+    source_zone: "{{ resolved_source_zone }}"
     source_ip: "{{ processed_rule.source_addresses | flatten }}"
-    destination_zone: "{{ processed_rule.az_destination_zone if device_group_name == 'SDDC Azure' else processed_rule.destination_zone }}"
+    destination_zone: "{{ resolved_destination_zone }}"
     destination_ip: "{{ processed_rule.destination_addresses }}"
     # service: "{{ processed_rule.services }}"
     service: >-
@@ -143,9 +165,9 @@
     description: "{{ processed_rule.description }}"
     tag_name: "{{ processed_rule.tags }}"
     group_tag: "{{ (tag_object | default(['sddc - automated']) | first | default('sddc - automated')) | string | trim }}"
-    source_zone: "{{ processed_rule.az_source_zone if device_group_name == 'SDDC Azure' else processed_rule.source_zone }}"
+    source_zone: "{{ resolved_source_zone }}"
     source_ip: "{{ processed_rule.source_addresses | flatten }}"
-    destination_zone: "{{ processed_rule.az_destination_zone if device_group_name == 'SDDC Azure' else processed_rule.destination_zone }}"
+    destination_zone: "{{ resolved_destination_zone }}"
     destination_ip: "{{ processed_rule.destination_addresses }}"
     # service: "{{ processed_rule.services }}"
     service: >-
