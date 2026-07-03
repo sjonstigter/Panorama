@@ -125,23 +125,38 @@
     label: "{{ item.address }}"
 
 # Service object functions
+- name: Split service destination ports by protocol
+  ansible.builtin.set_fact:
+    service_destination_ports_tcp: >-
+      {{
+        rule.service_destination_ports
+        | select('match', '^tcp-')
+        | list
+      }}
+    service_destination_ports_udp: >-
+      {{
+        rule.service_destination_ports
+        | select('match', '^udp-')
+        | list
+      }}
+
 - name: Normalise input values for service ports
   ansible.builtin.set_fact:
     normalised_service_destination_ports: >-
       {{
         (
-          rule.service_destination_ports
+          service_destination_ports_tcp
           | map('from_yaml')
           | flatten
         )
         if
-          rule.service_destination_ports | length > 0
-          and rule.service_destination_ports[0] is string
-          and rule.service_destination_ports[0].startswith('[')
+          service_destination_ports_tcp | length > 0
+          and service_destination_ports_tcp[0] is string
+          and service_destination_ports_tcp[0].startswith('[')
         else
-          rule.service_destination_ports
+          service_destination_ports_tcp
       }}
-    normalised_service_protocol: "{{ rule.service_protocol }}"
+    normalised_service_protocol: "tcp"
 
 - name: Get service objects from Panorama
   paloaltonetworks.panos.panos_service_object:
