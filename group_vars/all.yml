@@ -39,7 +39,7 @@ debug: true
 # Enable to use the Palo Alto Policy Checker to test if 
 # requested rules already matches an existing security rule
 ############################################################
-use_policy_checker: true
+use_policy_checker: false
 
 ############################################################
 # Enable to have Panorama commit and push the changes 
