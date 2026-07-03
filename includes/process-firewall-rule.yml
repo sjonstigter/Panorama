@@ -230,7 +230,7 @@
           | list
         )
       }}
-  loop: "{{ normalised_service_destination_ports }}"
+  loop: "{{ service_destination_ports_tcp_raw }}"
   loop_control:
     label: "{{ normalised_service_protocol }}-{{ item }}"
 
