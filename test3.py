@@ -40,6 +40,32 @@ def multiline_to_list(value):
     ]
 
 
+def protocol_ports_to_services(protocol, ports):
+    """
+    Convert protocol + ports to normalized service names.
+
+    Examples:
+      TCP + ["80"]       -> ["tcp-80"]
+      UDP + ["53"]       -> ["udp-53"]
+      TCP/UDP + ["80"]   -> ["tcp-80", "udp-80"]
+    """
+    protocol = str(protocol or "").strip().lower()
+    ports = multiline_to_list(ports)
+
+    services = []
+
+    for port in ports:
+        if protocol == "tcp/udp":
+            services.append(f"tcp-{port}")
+            services.append(f"udp-{port}")
+        elif protocol in ["tcp", "udp"]:
+            services.append(f"{protocol}-{port}")
+        else:
+            services.append(port)
+
+    return services
+
+
 def main():
     args = parse_args()
 
@@ -62,7 +88,7 @@ def main():
         # Normalize empty/whitespace cells to NaN
         df = df.replace(r"^\s*$", pd.NA, regex=True)
 
-        # Remove rows where "Row" is not numeric (e.g. "vb")
+        # Remove rows where "Row" is not numeric, for example "vb"
         df = df[pd.to_numeric(df["Row"], errors="coerce").notna()]
 
         # Remove empty rows
@@ -76,7 +102,7 @@ def main():
             ].notna().any(axis=1)
         ]
 
-        # Rename our header names to something actually usable
+        # Rename Excel header names to usable internal names
         df = df.rename(columns={
             "Row": "row",
             "Description": "description",
@@ -125,8 +151,26 @@ def main():
         "No": False
     })
 
-    # Convert multiline service destination ports to an Ansible-usable list
-    df["service_destination_port"] = df["service_destination_port"].apply(multiline_to_list)
+    # Create normalized services field from protocol + ports
+    #
+    # Examples:
+    #   service_protocol = TCP
+    #   service_destination_port = 80
+    #   services = ["tcp-80"]
+    #
+    #   service_protocol = TCP/UDP
+    #   service_destination_port = 80
+    #   services = ["tcp-80", "udp-80"]
+    df["services"] = df.apply(
+        lambda row: protocol_ports_to_services(
+            row["service_protocol"],
+            row["service_destination_port"]
+        ),
+        axis=1
+    )
+
+    # Remove original raw port column from final JSON
+    df = df.drop(columns=["service_destination_port"])
 
     # Convert pandas NaN → Python None, so JSON shows null
     df = df.astype(object).where(pd.notna(df), None)
