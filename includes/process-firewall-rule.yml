@@ -216,10 +216,6 @@
   vars:
     service_protocol: "{{ normalised_service_protocol }}"
 
-# - name: Service object TCP - Initialise resolved service object list
-#  ansible.builtin.set_fact:
-#    resolved_services: []
-
 - name: Service object TCP - Find service objects based on requested destination ports and protocol
   ansible.builtin.set_fact:
     resolved_services: >-
@@ -270,10 +266,6 @@
     label: "{{ normalised_service_protocol }}-{{ port }}"
   vars:
     service_protocol: "{{ normalised_service_protocol }}"
-
-# - name: Service object UDP - Initialise resolved service object list
-#   ansible.builtin.set_fact:
-#     resolved_services: []
 
 - name: Service object UDP - Find service objects based on requested destination ports and protocol
   ansible.builtin.set_fact:
