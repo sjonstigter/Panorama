@@ -140,21 +140,36 @@
         | list
       }}
 
+- name: Strip protocol prefix after splitting
+  ansible.builtin.set_fact:
+    service_destination_ports_tcp_raw: >-
+      {{
+        service_destination_ports_tcp
+        | map('regex_replace', '^tcp-', '')
+        | list
+      }}
+    service_destination_ports_udp_raw: >-
+      {{
+        service_destination_ports_udp
+        | map('regex_replace', '^udp-', '')
+        | list
+      }}
+
 - name: Normalise input values for service ports
   ansible.builtin.set_fact:
     normalised_service_destination_ports: >-
       {{
         (
-          service_destination_ports_tcp
+          service_destination_ports_tcp_raw
           | map('from_yaml')
           | flatten
         )
         if
-          service_destination_ports_tcp | length > 0
-          and service_destination_ports_tcp[0] is string
-          and service_destination_ports_tcp[0].startswith('[')
+          service_destination_ports_tcp_raw | length > 0
+          and service_destination_ports_tcp_raw[0] is string
+          and service_destination_ports_tcp_raw[0].startswith('[')
         else
-          service_destination_ports_tcp
+          service_destination_ports_tcp_raw
       }}
     normalised_service_protocol: "tcp"
 
