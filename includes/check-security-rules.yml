@@ -69,7 +69,7 @@
           #serial_number: "{{ firewall_list[rule.device_group[0]] }}"
         source_ip: "{{ pol_source_address | default(rule.source_address, true) }}"
         destination_ip: "{{ pol_destination_address | default(rule.destination_address, true) }}"
-        destination_port: "{{ rule.service_destination_port[0] }}"
+        destination_port: "{{ rule.service_destination_port[0] | regex_replace('^(tcp-|udp-)', '')}}"
         protocol: "{{ protocol_list[rule.service_protocol | lower] }}"
         application: >-
           {{
