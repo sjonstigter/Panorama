@@ -57,6 +57,7 @@
             | selectattr('value', 'equalto', item.address)
             | map(attribute='name')
             | list
+            | first
           )
         ]
       }}
@@ -124,7 +125,6 @@
     label: "{{ item.address }}"
 
 # Service object functions
-# Move to an include so we can loop through protocol on the include?
 - name: Normalise input values for service ports
   ansible.builtin.set_fact:
     normalised_service_destination_ports: >-
@@ -200,7 +200,6 @@
   loop: "{{ normalised_service_destination_ports }}"
   loop_control:
     label: "{{ normalised_service_protocol }}-{{ item }}"
-# / Move to an include so we can loop through protocol on the include?
 
 # tag object functions
 - name: Find tag based on input variable - Get tag objects from Panorama
