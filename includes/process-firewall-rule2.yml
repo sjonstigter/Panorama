@@ -150,56 +150,180 @@
     gathered_filter: "*"
   register: gathered_service_objects
 
-- name: Determine existing ports - Build list of all ports per defined protocol
-  ansible.builtin.set_fact:
-    existing_ports: >-
-      {{
-        gathered_service_objects.gathered
-        | selectattr('protocol', 'equalto', normalised_service_protocol)
-        | map(attribute='destination_port')
-        | map('string')
-        | list
-      }}
+- name: Block for processing single protocol entries (TCP or UDP)
+  when:
+    - normalised_service_protocol in ['tcp', 'udp']
+  block:
 
-- name: Determine missing ports - compare service destination ports to existing ports
-  ansible.builtin.set_fact:
-    missing_ports: >-
-      {{
-        normalised_service_destination_ports
-        | map('string')
-        | difference(existing_ports)
-      }}
+    - name: Determine existing ports - Build list of all ports per defined protocol
+      ansible.builtin.set_fact:
+        existing_ports: >-
+          {{
+            gathered_service_objects.gathered
+            | selectattr('protocol', 'equalto', normalised_service_protocol)
+            | map(attribute='destination_port')
+            | map('string')
+            | list
+          }}
 
-- name: Create missing service objects
-  ansible.builtin.include_tasks: includes/create-service-object.yml
-  loop: "{{ missing_ports }}"
-  loop_control:
-    loop_var: port
-    label: "{{ normalised_service_protocol }}-{{ port }}"
-  vars:
-    service_protocol: "{{ normalised_service_protocol }}"
+    - name: Determine missing ports - compare service destination ports to existing ports
+      ansible.builtin.set_fact:
+        missing_ports: >-
+          {{
+            normalised_service_destination_ports
+            | map('string')
+            | difference(existing_ports)
+          }}
 
-- name: Initialise resolved service object list
-  ansible.builtin.set_fact:
-    resolved_services: []
+    - name: Create missing service objects
+      ansible.builtin.include_tasks: includes/create-service-object.yml
+      loop: "{{ missing_ports }}"
+      loop_control:
+        loop_var: port
+        label: "{{ normalised_service_protocol }}-{{ port }}"
+      vars:
+        service_protocol: "{{ normalised_service_protocol }}"
 
-- name: Find service objects based on requested destination ports and protocol
-  ansible.builtin.set_fact:
-    resolved_services: >-
-      {{
-        resolved_services
-        +
-        (
-          gathered_service_objects.gathered
-          | selectattr('protocol', 'equalto', normalised_service_protocol)
-          | selectattr('destination_port', 'equalto', item | string)
-          | map(attribute='name')
-          | list
-        )
-      }}
-  loop: "{{ normalised_service_destination_ports }}"
-  loop_control:
-    label: "{{ normalised_service_protocol }}-{{ item }}"
+    - name: Initialise resolved service object list
+      ansible.builtin.set_fact:
+        resolved_services: []
+
+    - name: Find service objects based on requested destination ports and protocol
+      ansible.builtin.set_fact:
+        resolved_services: >-
+          {{
+            resolved_services
+            +
+            (
+              gathered_service_objects.gathered
+              | selectattr('protocol', 'equalto', normalised_service_protocol)
+              | selectattr('destination_port', 'equalto', item | string)
+              | map(attribute='name')
+              | list
+            )
+          }}
+      loop: "{{ normalised_service_destination_ports }}"
+      loop_control:
+        label: "{{ normalised_service_protocol }}-{{ item }}"
+
+
+- name: Block for processing multi protocol entries (TCP and UDP)
+  when:
+    - normalised_service_protocol in ['tcp/udp']
+  block:
+
+    - name: Determine existing ports - Build list of all ports for tcp
+      ansible.builtin.set_fact:
+        existing_ports: >-
+          {{
+            gathered_service_objects.gathered
+            | selectattr('protocol', 'equalto', "tcp")
+            | map(attribute='destination_port')
+            | map('string')
+            | list
+          }}
+
+    - name: Determine missing ports - compare service destination ports to existing ports
+      ansible.builtin.set_fact:
+        tcp_missing_ports: >-
+          {{
+            normalised_service_destination_ports
+            | map('string')
+            | difference(existing_ports)
+          }}
+        missing_protocol: "tcp"
+
+    - name: Create missing service objects
+      ansible.builtin.include_tasks: includes/create-service-object.yml
+      loop: "{{ tcp_missing_ports }}"
+      loop_control:
+        loop_var: port
+        label: "{{ missing_protocol }}-{{ port }}"
+      vars:
+        service_protocol: "{{ missing_protocol }}"
+
+    - name: Initialise resolved service object list
+      ansible.builtin.set_fact:
+        resolved_services: []
+
+    - name: Set normalised_service_protocol to TCP
+      ansible.builtin.set_fact:
+        normalised_service_protocol: "tcp"
+
+    - name: Find service objects based on requested destination ports and tcp protocol
+      ansible.builtin.set_fact:
+        resolved_services: >-
+          {{
+            resolved_services
+            +
+            (
+              gathered_service_objects.gathered
+              | selectattr('protocol', 'equalto', "tcp")
+              | selectattr('destination_port', 'equalto', item | string)
+              | map(attribute='name')
+              | list
+            )
+          }}
+      loop: "{{ normalised_service_destination_ports }}"
+      loop_control:
+        label: "{{ normalised_service_protocol }}-{{ item }}"
+
+#UDP
+    - name: Determine existing ports - Build list of all ports for udp
+      ansible.builtin.set_fact:
+        existing_ports: >-
+          {{
+            gathered_service_objects.gathered
+            | selectattr('protocol', 'equalto', "udp")
+            | map(attribute='destination_port')
+            | map('string')
+            | list
+          }}
+
+    - name: Determine missing ports - compare service destination ports to existing ports
+      ansible.builtin.set_fact:
+        tcp_missing_ports: >-
+          {{
+            normalised_service_destination_ports
+            | map('string')
+            | difference(existing_ports)
+          }}
+        missing_protocol: "udp"
+
+    - name: Create missing service objects
+      ansible.builtin.include_tasks: includes/create-service-object.yml
+      loop: "{{ tcp_missing_ports }}"
+      loop_control:
+        loop_var: port
+        label: "{{ missing_protocol }}-{{ port }}"
+      vars:
+        service_protocol: "{{ missing_protocol }}"
+
+    - name: Initialise resolved service object list
+      ansible.builtin.set_fact:
+        resolved_services: []
+
+    - name: Set normalised_service_protocol to UDP
+      ansible.builtin.set_fact:
+        normalised_service_protocol: "udp"
+
+    - name: Find service objects based on requested destination ports and udp protocol
+      ansible.builtin.set_fact:
+        resolved_services: >-
+          {{
+            resolved_services
+            +
+            (
+              gathered_service_objects.gathered
+              | selectattr('protocol', 'equalto', "udp")
+              | selectattr('destination_port', 'equalto', item | string)
+              | map(attribute='name')
+              | list
+            )
+          }}
+      loop: "{{ normalised_service_destination_ports }}"
+      loop_control:
+        label: "{{ normalised_service_protocol }}-{{ item }}"
 
 # tag object functions
 - name: Find tag based on input variable - Get tag objects from Panorama
