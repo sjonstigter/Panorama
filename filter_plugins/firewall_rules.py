@@ -81,7 +81,7 @@ def combine_firewall_rules(rules, combine_mode="port"):
             }
 
         combined[key]["applications"].append(rule.get("application"))
-        combined[key]["service_destination_ports"].append(str(rule.get("service_destination_port")))
+        combined[key]["service_destination_ports"].append(str(rule.get("services")))
         combined[key]["rows"].append(rule.get("row"))
 
         combined[key]["sources"].append({
