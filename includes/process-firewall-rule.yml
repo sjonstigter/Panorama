@@ -1,13 +1,13 @@
 ---
 # Source Address function
-- name: Get address objects from Panorama
+- name: Source Address - Get address objects from Panorama
   paloaltonetworks.panos.panos_address_object:
     provider: "{{ provider }}"
     state: gathered
     gathered_filter: "*"
   register: gathered_address_objects
 
-- name: Build requested source objects list from input variables
+- name: Source Address - Build requested source objects list from input variables
   ansible.builtin.set_fact:
     requested_sources: >-
       {{
@@ -16,7 +16,7 @@
         | list
       }}
 
-- name: Build list of existing Panorama address object values from gathered objects
+- name: Source Address - Build list of existing Panorama address object values from gathered objects
   ansible.builtin.set_fact:
     existing_address_values: >-
       {{
@@ -25,7 +25,7 @@
         | list
       }}
 
-- name: Determine missing source objects by comparing lists
+- name: Source Address - Determine missing source objects by comparing lists
   ansible.builtin.set_fact:
     missing_sources: >-
       {{
@@ -34,18 +34,18 @@
         | list
       }}
 
-- name: Create missing source address objects
+- name: Source Address - Create missing source address objects
   ansible.builtin.include_tasks: includes/create-address-object.yml
   loop: "{{ missing_sources }}"
   loop_control:
     loop_var: source
     label: "{{ source.name | default(source.address) }}"
 
-- name: Initialise resolved source addresses list
+- name: Source Address - Initialise resolved source addresses list
   ansible.builtin.set_fact:
     resolved_source_addresses: []
 
-- name: Find firewall object based on requested_sources addresses
+- name: Source Address - Find firewall object based on requested_sources addresses
   ansible.builtin.set_fact:
     resolved_source_addresses: >-
       {{
@@ -66,7 +66,7 @@
     label: "{{ item.address }}"
 
 # Destination Address function
-- name: Build requested destination objects list from input variables
+- name: Destination Address - Build requested destination objects list from input variables
   ansible.builtin.set_fact:
     requested_destinations: >-
       {{
@@ -75,7 +75,7 @@
         | list
       }}
 
-- name: Build list of existing Panorama address object values from gathered objects - TODO determine if this is dupe
+- name: Destination Address - Build list of existing Panorama address object values from gathered objects - TODO determine if this is dupe
   ansible.builtin.set_fact:
     existing_address_values: >-
       {{
@@ -84,7 +84,7 @@
         | list
       }}
 
-- name: Determine missing destination objects by comparing lists
+- name: Destination Address - Determine missing destination objects by comparing lists
   ansible.builtin.set_fact:
     missing_destinations: >-
       {{
@@ -93,18 +93,18 @@
         | list
       }}
 
-- name: Create missing destination address objects
+- name: Destination Address - Create missing destination address objects
   ansible.builtin.include_tasks: includes/create-address-object.yml
   loop: "{{ missing_destinations }}"
   loop_control:
     loop_var: destination
     label: "{{ destination.name | default(destination.address) }}"
 
-- name: Initialise resolved destination addresses list
+- name: Destination Address - Initialise resolved destination addresses list
   ansible.builtin.set_fact:
     resolved_destination_addresses: []
 
-- name: Find firewall object based on requested_destinations addresses
+- name: Destination Address - Find firewall object based on requested_destinations addresses
   ansible.builtin.set_fact:
     resolved_destination_addresses: >-
       {{
@@ -125,7 +125,7 @@
     label: "{{ item.address }}"
 
 # Service object functions
-- name: Normalise input values for service ports
+- name: Service object - Normalise input values for service ports
   ansible.builtin.set_fact:
     normalised_service_destination_ports: >-
       {{
@@ -142,7 +142,7 @@
           rule.service_destination_ports
       }}
 
-- name: Split service destination ports by protocol
+- name: Service object - Split service destination ports by protocol
   ansible.builtin.set_fact:
     service_destination_ports_tcp: >-
       {{
@@ -157,7 +157,7 @@
         | list
       }}
 
-- name: Strip protocol prefix after splitting
+- name: Service object - Strip protocol prefix after splitting
   ansible.builtin.set_fact:
     service_destination_ports_tcp_raw: >-
       {{
@@ -172,18 +172,18 @@
         | list
       }}
 
-- name: Get service objects from Panorama
+- name: Service object - Get service objects from Panorama
   paloaltonetworks.panos.panos_service_object:
     provider: "{{ provider }}"
     state: gathered
     gathered_filter: "*"
   register: gathered_service_objects
 
-- name: Normalise input values for service protcol
+- name: Service object - Normalise input values for service protcol
   ansible.builtin.set_fact:
     normalised_service_protocol: "tcp"
 
-- name: Determine existing ports - Build list of all ports per defined protocol
+- name: Service object - Determine existing ports - Build list of all ports per defined protocol
   ansible.builtin.set_fact:
     existing_ports: >-
       {{
@@ -194,7 +194,7 @@
         | list
       }}
 
-- name: Determine missing ports - compare service destination ports to existing ports
+- name: Service object - Determine missing ports - compare service destination ports to existing ports
   ansible.builtin.set_fact:
     missing_ports: >-
       {{
@@ -203,7 +203,7 @@
         | difference(existing_ports)
       }}
 
-- name: Create missing service objects
+- name: Service object - Create missing service objects
   ansible.builtin.include_tasks: includes/create-service-object.yml
   loop: "{{ missing_ports }}"
   loop_control:
@@ -212,11 +212,11 @@
   vars:
     service_protocol: "{{ normalised_service_protocol }}"
 
-- name: Initialise resolved service object list
+- name: Service object - Initialise resolved service object list
   ansible.builtin.set_fact:
     resolved_services: []
 
-- name: Find service objects based on requested destination ports and protocol
+- name: Service object - Find service objects based on requested destination ports and protocol
   ansible.builtin.set_fact:
     resolved_services: >-
       {{
@@ -235,14 +235,14 @@
     label: "{{ normalised_service_protocol }}-{{ item }}"
 
 # tag object functions
-- name: Find tag based on input variable - Get tag objects from Panorama
+- name: Tag object - Find tag based on input variable - Get tag objects from Panorama
   paloaltonetworks.panos.panos_tag_object:
     provider: "{{ provider }}"
     state: gathered
     gathered_filter: '*'
   register: gathered_tag_objects
 
-- name: Build unique source CI list
+- name: Tag object - Build unique source CI list
   ansible.builtin.set_fact:
     source_ci_list: >-
       {{
@@ -253,7 +253,7 @@
         | list
       }}
 
-- name: Build unique destination CI list
+- name: Tag object - Build unique destination CI list
   ansible.builtin.set_fact:
     destination_ci_list: >-
       {{
@@ -264,11 +264,11 @@
         | list
       }}
 
-- name: Initialise resolved tags list - starting with predefined automated tag
+- name: Tag object - Initialise resolved tags list - starting with predefined automated tag
   ansible.builtin.set_fact:
     resolved_tag: ["sddc - automated"]
 
-- name: Append matching Panorama source tags by looping through source CI list
+- name: Tag object - Append matching Panorama source tags by looping through source CI list
   ansible.builtin.set_fact:
     resolved_tag: >-
       {{
@@ -286,7 +286,7 @@
   loop_control:
     label: "{{ item }}"
 
-- name: Append matching Panorama destination tags by looping through destination CI list
+- name: Tag object - Append matching Panorama destination tags by looping through destination CI list
   ansible.builtin.set_fact:
     resolved_tag: >-
       {{
@@ -304,11 +304,11 @@
   loop_control:
     label: "{{ item }}"
 
-- name: Remove duplicate tags by unique-ing our list
+- name: Tag object - Remove duplicate tags by unique-ing our list
   ansible.builtin.set_fact:
     resolved_tag: "{{ resolved_tag | unique | list }}"
 
-- name: Add resolved values to processed firewall rule list
+- name: Create Security Rule - Add resolved values to processed firewall rule list
   ansible.builtin.set_fact:
     processed_combined_firewall_rules: >-
       {{
@@ -323,7 +323,7 @@
         ]
       }}
 
-- name: Create the security rule looping through the device_groups
+- name: Create Security Rule - Create the security rule looping through the device_groups
   ansible.builtin.include_tasks: includes/create-security-rule.yml
   loop: "{{ rule.device_group }}"
   loop_control:
