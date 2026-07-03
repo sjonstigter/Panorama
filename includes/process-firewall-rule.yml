@@ -172,16 +172,16 @@
         | list
       }}
 
-- name: Normalise input values for service protcol
-  ansible.builtin.set_fact:
-    normalised_service_protocol: "tcp"
-
 - name: Get service objects from Panorama
   paloaltonetworks.panos.panos_service_object:
     provider: "{{ provider }}"
     state: gathered
     gathered_filter: "*"
   register: gathered_service_objects
+
+- name: Normalise input values for service protcol
+  ansible.builtin.set_fact:
+    normalised_service_protocol: "tcp"
 
 - name: Determine existing ports - Build list of all ports per defined protocol
   ansible.builtin.set_fact:
@@ -198,7 +198,7 @@
   ansible.builtin.set_fact:
     missing_ports: >-
       {{
-        normalised_service_destination_ports
+        service_destination_ports_tcp_raw
         | map('string')
         | difference(existing_ports)
       }}
