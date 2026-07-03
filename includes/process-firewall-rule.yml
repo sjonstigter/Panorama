@@ -172,6 +172,10 @@
         | list
       }}
 
+- name: Service object - Initialise resolved service object list
+  ansible.builtin.set_fact:
+    resolved_services: []
+
 - name: Service object - Get service objects from Panorama
   paloaltonetworks.panos.panos_service_object:
     provider: "{{ provider }}"
@@ -179,11 +183,11 @@
     gathered_filter: "*"
   register: gathered_service_objects
 
-- name: Service object - Normalise input values for service protcol
+- name: Service object TCP - Normalise input values for service protcol
   ansible.builtin.set_fact:
     normalised_service_protocol: "tcp"
 
-- name: Service object - Determine existing ports - Build list of all ports per defined protocol
+- name: Service object TCP - Determine existing ports - Build list of all ports per defined protocol
   ansible.builtin.set_fact:
     existing_ports: >-
       {{
@@ -194,7 +198,7 @@
         | list
       }}
 
-- name: Service object - Determine missing ports - compare service destination ports to existing ports
+- name: Service object TCP - Determine missing ports - compare service destination ports to existing ports
   ansible.builtin.set_fact:
     missing_ports: >-
       {{
@@ -203,7 +207,7 @@
         | difference(existing_ports)
       }}
 
-- name: Service object - Create missing service objects
+- name: Service object TCP - Create missing service objects
   ansible.builtin.include_tasks: includes/create-service-object.yml
   loop: "{{ missing_ports }}"
   loop_control:
@@ -212,11 +216,11 @@
   vars:
     service_protocol: "{{ normalised_service_protocol }}"
 
-- name: Service object - Initialise resolved service object list
-  ansible.builtin.set_fact:
-    resolved_services: []
+# - name: Service object TCP - Initialise resolved service object list
+#  ansible.builtin.set_fact:
+#    resolved_services: []
 
-- name: Service object - Find service objects based on requested destination ports and protocol
+- name: Service object TCP - Find service objects based on requested destination ports and protocol
   ansible.builtin.set_fact:
     resolved_services: >-
       {{
@@ -231,6 +235,61 @@
         )
       }}
   loop: "{{ service_destination_ports_tcp_raw }}"
+  loop_control:
+    label: "{{ normalised_service_protocol }}-{{ item }}"
+
+- name: Service object UDP - Normalise input values for service protcol
+  ansible.builtin.set_fact:
+    normalised_service_protocol: "udp"
+
+- name: Service object UDP - Determine existing ports - Build list of all ports per defined protocol
+  ansible.builtin.set_fact:
+    existing_ports: >-
+      {{
+        gathered_service_objects.gathered
+        | selectattr('protocol', 'equalto', normalised_service_protocol)
+        | map(attribute='destination_port')
+        | map('string')
+        | list
+      }}
+
+- name: Service object UDP - Determine missing ports - compare service destination ports to existing ports
+  ansible.builtin.set_fact:
+    missing_ports: >-
+      {{
+        service_destination_ports_udp_raw
+        | map('string')
+        | difference(existing_ports)
+      }}
+
+- name: Service object UDP - Create missing service objects
+  ansible.builtin.include_tasks: includes/create-service-object.yml
+  loop: "{{ missing_ports }}"
+  loop_control:
+    loop_var: port
+    label: "{{ normalised_service_protocol }}-{{ port }}"
+  vars:
+    service_protocol: "{{ normalised_service_protocol }}"
+
+# - name: Service object UDP - Initialise resolved service object list
+#   ansible.builtin.set_fact:
+#     resolved_services: []
+
+- name: Service object UDP - Find service objects based on requested destination ports and protocol
+  ansible.builtin.set_fact:
+    resolved_services: >-
+      {{
+        resolved_services
+        +
+        (
+          gathered_service_objects.gathered
+          | selectattr('protocol', 'equalto', normalised_service_protocol)
+          | selectattr('destination_port', 'equalto', item | string)
+          | map(attribute='name')
+          | list
+        )
+      }}
+  loop: "{{ service_destination_ports_udp_raw }}"
   loop_control:
     label: "{{ normalised_service_protocol }}-{{ item }}"
 
