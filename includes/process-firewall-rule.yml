@@ -246,6 +246,10 @@
       ansible.builtin.set_fact:
         resolved_services: []
 
+    - name: Set normalised_service_protocol to TCP
+      ansible.builtin.set_fact:
+        normalised_service_protocol: "tcp"
+
     - name: Find service objects based on requested destination ports and tcp protocol
       ansible.builtin.set_fact:
         resolved_services: >-
@@ -262,7 +266,7 @@
           }}
       loop: "{{ normalised_service_destination_ports }}"
       loop_control:
-        label: "{{ missing_protocol }}-{{ item }}"
+        label: "{{ normalised_service_protocol }}-{{ item }}"
 
 #UDP
     - name: Determine existing ports - Build list of all ports for udp
@@ -299,6 +303,10 @@
       ansible.builtin.set_fact:
         resolved_services: []
 
+    - name: Set normalised_service_protocol to UDP
+      ansible.builtin.set_fact:
+        normalised_service_protocol: "udp"
+
     - name: Find service objects based on requested destination ports and udp protocol
       ansible.builtin.set_fact:
         resolved_services: >-
@@ -315,7 +323,7 @@
           }}
       loop: "{{ normalised_service_destination_ports }}"
       loop_control:
-        label: "{{ missing_protocol }}-{{ item }}"
+        label: "{{ normalised_service_protocol }}-{{ item }}"
 
 # tag object functions
 - name: Find tag based on input variable - Get tag objects from Panorama
