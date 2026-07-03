@@ -217,7 +217,7 @@
         existing_ports: >-
           {{
             gathered_service_objects.gathered
-            | selectattr('protocol', 'equalto', tcp)
+            | selectattr('protocol', 'equalto', "tcp")
             | map(attribute='destination_port')
             | map('string')
             | list
@@ -258,7 +258,7 @@
             +
             (
               gathered_service_objects.gathered
-              | selectattr('protocol', 'equalto', tcp)
+              | selectattr('protocol', 'equalto', "tcp")
               | selectattr('destination_port', 'equalto', item | string)
               | map(attribute='name')
               | list
@@ -274,7 +274,7 @@
         existing_ports: >-
           {{
             gathered_service_objects.gathered
-            | selectattr('protocol', 'equalto', udp)
+            | selectattr('protocol', 'equalto', "udp")
             | map(attribute='destination_port')
             | map('string')
             | list
@@ -315,7 +315,7 @@
             +
             (
               gathered_service_objects.gathered
-              | selectattr('protocol', 'equalto', udp)
+              | selectattr('protocol', 'equalto', "udp")
               | selectattr('destination_port', 'equalto', item | string)
               | map(attribute='name')
               | list
