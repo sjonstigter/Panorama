@@ -144,30 +144,17 @@
 
 - name: Service object - Split service destination ports by protocol
   ansible.builtin.set_fact:
-    service_destination_ports_tcp: >-
+    service_destination_ports_tcp_raw: >-
       {{
         normalised_service_destination_ports
         | select('match', '^tcp-')
-        | list
-      }}
-    service_destination_ports_udp: >-
-      {{
-        normalised_service_destination_ports
-        | select('match', '^udp-')
-        | list
-      }}
-
-- name: Service object - Strip protocol prefix after splitting
-  ansible.builtin.set_fact:
-    service_destination_ports_tcp_raw: >-
-      {{
-        service_destination_ports_tcp
         | map('regex_replace', '^tcp-', '')
         | list
       }}
     service_destination_ports_udp_raw: >-
       {{
-        service_destination_ports_udp
+        normalised_service_destination_ports
+        | select('match', '^udp-')
         | map('regex_replace', '^udp-', '')
         | list
       }}
