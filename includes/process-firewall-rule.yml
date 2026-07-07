@@ -142,7 +142,7 @@
           rule.service_destination_ports
       }}
 
-- name: Service object - Split service destination ports by protocol
+- name: Service object - Split service destination ports by protocol to seperate lists
   ansible.builtin.set_fact:
     service_destination_ports_tcp_raw: >-
       {{
