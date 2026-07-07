@@ -44,6 +44,15 @@
     - processed_rule.services is defined
     - processed_rule.services | length == 1
 
+- name: Keep tcp-443 as service for Azure FW
+  ansible.builtin.set_fact:
+    application: ""
+  when:
+    - device_group_name == 'SDDC Azure'
+    - processed_rule.services is defined
+    - processed_rule.services | length == 1
+    - processed_rule.services | first == "tcp-443"
+
 - name: Resolve source zone
   ansible.builtin.set_fact:
     resolved_source_zone: >-
