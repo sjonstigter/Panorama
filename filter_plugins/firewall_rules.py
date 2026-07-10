@@ -91,6 +91,9 @@ def combine_firewall_rules(rules, combine_mode="port"):
         combined[key]["source_cis"].append(rule.get("source_ci"))
         combined[key]["destination_cis"].append(rule.get("destination_ci"))
 
+        combined[key]["common_cis"].append(rule.get("source_ci"))
+        combined[key]["common_cis"].append(rule.get("destination_ci"))
+
         combined[key]["sources"].append({
             "address": rule.get("source_address"),
             "name": rule.get("source_name"),
@@ -137,6 +140,7 @@ def _normalize_rule(rule):
     rule["rows"] = _unique_list(rule["rows"])
     rule["common_source_ci"] = _most_common_value(rule["source_cis"])
     rule["common_destination_ci"] = _most_common_value(rule["destination_cis"])
+    rule["common_ci"] = _most_common_value(rule["common_cis"])
     rule["sources"] = _unique_dicts(rule["sources"])
     rule["destinations"] = _unique_dicts(rule["destinations"])
     return rule
