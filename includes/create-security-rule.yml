@@ -44,7 +44,7 @@
     - processed_rule.services is defined
     - processed_rule.services | length == 1
 
-- name: Keep tcp-443 as service for Azure FW
+- name: Keep tcp-443 as service for Azure FW by making application empty
   ansible.builtin.set_fact:
     application: ""
   when:
