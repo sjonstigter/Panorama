@@ -1,3 +1,5 @@
+from collections import Counter
+
 def combine_firewall_rules(rules, combine_mode="port"):
     combined = {}
 
@@ -120,12 +122,21 @@ def _unique_dicts(values):
     return result
 
 
+def _most_common_value(values):
+    filtered_values = [value for value in values if value is not None]
+
+    if not filtered_values:
+        return None
+
+    return Counter(filtered_values).most_common(1)[0][0]
+
+
 def _normalize_rule(rule):
     rule["applications"] = _unique_list(rule["applications"])
     rule["service_destination_ports"] = _unique_list(rule["service_destination_ports"])
     rule["rows"] = _unique_list(rule["rows"])
-#    rule["source_cis"] = _unique_list(rule["source_cis"])
-#    rule["destination_cis"] = _unique_list(rule["destination_cis"])
+    rule["common_source_ci"] = _most_common_value(rule["source_cis"])
+    rule["common_destination_ci"] = _most_common_value(rule["destination_cis"])
     rule["sources"] = _unique_dicts(rule["sources"])
     rule["destinations"] = _unique_dicts(rule["destinations"])
     return rule
