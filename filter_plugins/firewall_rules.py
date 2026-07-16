@@ -82,6 +82,7 @@ def combine_firewall_rules(rules, combine_mode="port"):
                 "destinations": [],
                 "source_cis": [],
                 "destination_cis": [],
+                "common_cis": [],
             }
 
         combined[key]["applications"].append(rule.get("application"))

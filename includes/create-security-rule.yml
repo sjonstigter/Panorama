@@ -96,6 +96,30 @@
       ansible.builtin.set_fact:
         tag_object_name: "{{ group_by_ci }}"
 
+    - name: Find tag based on input variable - Set tag_object_name to destination CI when destination is not External
+    # Use destination CI when destination is not external
+      ansible.builtin.set_fact:
+        tag_object_name: "{{ rule.common_destination_cis }}"
+      when:
+        - destination_zone != 'sddc-external'
+        - rule.common_destination_cis | default([]) | length > 0
+
+    - name: Find tag based on input variable - Set tag_object_name to source CI when destination is External
+    # Use source CI when destination is external
+      ansible.builtin.set_fact:
+        tag_object_name: "{{ rule.common_source_cis[0] }}"
+      when:
+        - destination_zone == 'sddc-external'
+        - rule.common_source_cis | default([]) | length > 0
+        - tag_object_name is not defined
+
+    - name: Find tag based on input variable - Set tag_object_name to group_by_ci extra_var when defined
+    # Fall back to tag_object when no CI was selected
+      ansible.builtin.set_fact:
+        tag_object_name: "{{ group_by_ci }}"
+      when:
+        - group_by_ci is defined
+
     - name: Find tag based on input variable - Get tag objects from Panorama
       paloaltonetworks.panos.panos_tag_object:
         provider: "{{ provider }}"
